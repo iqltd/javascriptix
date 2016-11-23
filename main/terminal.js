@@ -1,56 +1,40 @@
+'use strict';
 
-function get_commandline() {
-    'use strict';
+var prompt,
+    results,
+    promptString = '$';
+
+window.onload = function () {
+    prompt = document.getElementById("cmd");
+    results = document.getElementById("results");
     
-	return document.getElementById("cmd");
+    var promptText = document.createTextNode(promptString + ' ');
+    document.getElementById("promptText").appendChild(promptText);
+};
+
+function readUserInput() {
+	return prompt.value.trim();
 }
 
-function read_command() {
-    'use strict';
-    
-	return get_commandline().value.trim();
+function resetPrompt() {
+	prompt.value = '';
 }
 
-function reset_commandline() {
-    'use strict';
-    
-	get_commandline().value = '';
-}
-
-function getFirstCommand(command) {
-    'use strict';
-    
-	var idx = command.slice(0).indexOf(' '),
-	    word = idx === -1 ? command
-		    : command.substr(0, idx);
-	return word;
-}
-
-function show(command) {
-    'use strict';
-    
-	var results = document.getElementById("results"),
-        para = document.createElement("P"),
-        text = document.createTextNode(command);
-	para.appendChild(text);
-	results.appendChild(para);
-}
-
-function interpret(command) {
-    'use strict';
-    
-	show(command);
-	if (command.length > 0) {
-		show(getFirstCommand(command) + ': command not found');
-	}
+function show(text) {
+    if (text.length > 0) {
+        var paragraph = document.createElement("P"),
+            textNode = document.createTextNode(text);
+        paragraph.appendChild(textNode);
+        results.appendChild(paragraph);
+    }
 }
 
 function listen(e) {
-    'use strict';
-    
 	if (e.keyCode === 13) {
-        interpret(read_command());
-        reset_commandline();
+        var userInput = readUserInput();
+        show(promptString + ' ' + userInput);
+        show(interpret(userInput));
+        resetPrompt();
         return false;
     }
 }
