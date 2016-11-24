@@ -3,14 +3,17 @@
 <head>
     <meta charset="utf-8"/>
 	<title>Javashcript page</title>
-        
+    
+    <link rel="stylesheet" href="terminal.css">
+    
     <script type="text/javascript" src="js/linux.js"></script>
     <script type="text/javascript" src="js/bash.js"></script>
 	<script type="text/javascript" src="js/terminal.js"></script>
 </head>
 
 <body>
-	<div id="results"></div>
-	<span id="promptText"></span><textarea id="cmd" onkeypress="listen(event)" ></textarea>
+	<div id="results" class="commandText"></div>
+	<span id="promptText"></span>
+    <textarea id="cmd" class="commandText" onkeypress="listen(event)" ></textarea>
 </body>
 </html>
