@@ -2,15 +2,19 @@ html, body {
     background-color: black;
 }
 
+p {
+    margin: 0;
+}
+
 #promptText {
     color: cornflowerblue;
-    padding-right: 10px;
 }
 
 .commandText {
     color: white;
     font-family: 'Courier', monospace;
     font-size: 1em;
+    font-weight: 700;
 }
 
 #cmd {

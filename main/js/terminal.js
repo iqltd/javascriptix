@@ -2,7 +2,7 @@
 
 var prompt,
     results,
-    promptString = '$';
+    promptString = '$ ';
 
 window.onload = function () {
     prompt = document.getElementById("cmd");
