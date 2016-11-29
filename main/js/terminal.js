@@ -2,6 +2,8 @@
 
 var prompt,
     results,
+    currentUser,
+    workingDirectory,
     promptString = '$ ';
 
 window.onload = function () {
@@ -10,6 +12,9 @@ window.onload = function () {
     
     var promptText = document.createTextNode(promptString + ' ');
     document.getElementById("promptText").appendChild(promptText);
+    
+    currentUser = users.guest;
+    workingDirectory = fs.root.getChild('home').getChild('guest');
 };
 
 function readUserInput() {
