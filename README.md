@@ -1,2 +1,2 @@
 # javashcript
-A bash implementation in Javascript
+A naive bash implementation in Javascript
