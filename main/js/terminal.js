@@ -14,7 +14,8 @@ window.onload = function () {
     document.getElementById("promptText").appendChild(promptText);
     
     currentUser = users.guest;
-    workingDirectory = fs.root.getChild('home').getChild('guest');
+    initFs();
+    workingDirectory = fs.get('/home/guest');
 };
 
 function readUserInput() {
