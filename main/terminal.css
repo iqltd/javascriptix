@@ -6,18 +6,21 @@ p {
     margin: 0;
 }
 
-#promptText {
+.promptText {
     color: cornflowerblue;
 }
 
-.commandText {
+.normalText {
     color: white;
-    font-family: 'Courier', monospace;
-    font-size: 1em;
-    font-weight: 700;
 }
 
-#cmd {
+.commandText {
+    font-family: 'Courier', monospace;
+    font-size: 1em;
+    font-weight: 600;
+}
+
+#stdin {
     background-color: black;
     width: 90%;
     height: 1.1em;

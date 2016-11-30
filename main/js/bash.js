@@ -8,8 +8,19 @@ function extractCommand(input) {
 }
 
 function interpret(userInput) {
+    var command, file;
 	if (userInput.length > 0) {
-		return extractCommand(userInput) + ': command not found';
+        command = extractCommand(userInput);
+        file = fs.get(command);
+        if (file) {
+            if (file.content instanceof Function) {
+                return file.content();
+            } else {
+                interpret(file.content);
+            }
+        } else {
+            throw command + ': command not found';
+        }
 	}
     return '';
 }

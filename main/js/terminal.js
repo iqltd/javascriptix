@@ -1,17 +1,17 @@
 'use strict';
 
-var prompt,
+var stdin,
     results,
     currentUser,
     workingDirectory,
     promptString = '$ ';
 
 window.onload = function () {
-    prompt = document.getElementById("cmd");
+    stdin = document.getElementById("stdin");
     results = document.getElementById("results");
     
     var promptText = document.createTextNode(promptString + ' ');
-    document.getElementById("promptText").appendChild(promptText);
+    document.getElementById("prompt").appendChild(promptText);
     
     currentUser = users.guest;
     initFs();
@@ -19,27 +19,41 @@ window.onload = function () {
 };
 
 function readUserInput() {
-	return prompt.value.trim();
+	return stdin.value.trim();
 }
 
 function resetPrompt() {
-	prompt.value = '';
+	stdin.value = '';
 }
 
-function show(text) {
-    if (text.length > 0) {
-        var paragraph = document.createElement("P"),
-            textNode = document.createTextNode(text);
-        paragraph.appendChild(textNode);
-        results.appendChild(paragraph);
+function show(text, showPromptText) {
+    var line = document.createElement("DIV");
+    results.appendChild(line);
+    
+    if (showPromptText) {
+        var span = document.createElement("SPAN");
+        span.classList.add("commandText");
+        span.classList.add("promptText");
+        span.textContent = promptString;
+        line.appendChild(span);
+    }
+    if (text) {
+        var info = document.createElement("SPAN")
+        info.textContent = text;
+        line.appendChild(info);
     }
 }
 
 function listen(e) {
 	if (e.keyCode === 13) {
         var userInput = readUserInput();
-        show(promptString + ' ' + userInput);
-        show(interpret(userInput));
+        show(userInput, true);
+        try {
+            show(interpret(userInput));
+        } catch(err) {
+            show(err);
+        }
+        
         resetPrompt();
         return false;
     }

@@ -53,11 +53,11 @@ function File(name, parent, user) {
     this.content = '';
     this.write = function (text, append) {
         if (append) {
-            content += text;
+            this.content += text;
         } else {
-            content = text;
+            this.content = text;
         }
-    }
+    };
 }
 
 function Directory(name, parent, user) {
@@ -71,28 +71,29 @@ function Directory(name, parent, user) {
 }
 
 function parsePath(path) {
-    var index, startingIndex, dir, crtName;
+    var index, startingIndex, parentDir, dir, crtName;
     
     if (path.charAt(0) === '/') {
         startingIndex = 1;
-        dir = fs.root;
+        parentDir = fs.root;
     } else {
         startingIndex = 0;
-        dir = workingDirectory;
+        parentDir = workingDirectory;
     }
     
     index = 0;
-    while (index < path.length) {
+    while (index < path.length && parentDir) {
         index = path.indexOf('/', startingIndex);
         index = index === -1 ? path.length : index;
-        if (index - startingIndex > 1) {
+        if (index - startingIndex > 0) {
             crtName = path.substring(startingIndex, index);
-            dir = dir.content[crtName];
-            if (!dir) {
-                throw crtName + ": No such file or directory";
-            }
+            dir = parentDir.content[crtName];
+            parentDir = dir;
         }
         startingIndex = index + 1;
+    }
+    if (!dir) {
+        throw crtName + ": No such file or directory";
     }
     return dir;
 }
