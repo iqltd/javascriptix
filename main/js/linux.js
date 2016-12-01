@@ -2,30 +2,32 @@
 
 var users = {}, groups = {}, fs = {};
 
-groups.root = {
-    gid: 0,
-    name: 'root'
+groups = {
+    root: {
+        gid: 0,
+        name: 'root'
+    },
+    guest: {
+        gid: 100,
+        name: 'guest'
+    }
 };
 
-users.root = {
-    uid: 0,
-    name: 'root',
-    group: groups.root,
-    shell: "/bin/bash",
-    home: "/root"
-};
-
-groups.guest = {
-    gid: 100,
-    name: 'guest'
-};
-
-users.guest = {
-    uid: 100,
-    name: 'guest',
-    group: groups.guest,
-    shell: "/bin/bash",
-    home: "/home/guest"
+users = {
+    root: {
+        uid: 0,
+        name: 'root',
+        group: groups.root,
+        shell: "/bin/bash",
+        home: "/root"
+    },
+    guest: {
+        uid: 100,
+        name: 'guest',
+        group: groups.guest,
+        shell: "/bin/bash",
+        home: "/home/guest"
+    }
 };
 
 var FileType = Object.freeze({FILE: 'f', DIRECTORY: 'd', BLOCK: 'b', CHARACTER: 'c', LINK: 'l'});
@@ -37,12 +39,11 @@ function FileSystemObject(name, parent, user) {
     this.user = user;
     this.group = user.group;
     this.path = function () {
-        if (!this.parent) {
-            return '/';
-        } else if (!this.parent.parent) {
-            return '/' + this.name;
-        }
-        return this.parent.path() + '/' + this.name;
+        var base, ending;
+        base = (this.parent) ? this.parent.path() : '';
+        ending = (this.type === FileType.DIRECTORY) ? '/' : '';
+        
+        return base + this.name + ending;
     };
 }
 
@@ -51,12 +52,11 @@ function File(name, parent, user) {
     this.base(name, parent, user);
     this.type = FileType.FILE;
     this.content = '';
-    this.write = function (text, append) {
-        if (append) {
-            this.content += text;
-        } else {
-            this.content = text;
-        }
+    this.append = function (text) {
+        this.content += text;
+    };
+    this.overwrite = function (text) {
+        this.content = text;
     };
 }
 
@@ -99,7 +99,7 @@ function parsePath(path) {
 }
 
 fs = {
-    root: new Directory("/", null, users.root),
+    root: new Directory("", null, users.root),
     mkdir: function (parent, name, user) {
         parent.content[name] = new Directory(name, parent, user);
     },
