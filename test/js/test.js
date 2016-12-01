@@ -2,23 +2,40 @@
 
 var results;
 
-function show_result(result, detail) {
+function addTestSuiteHeader(tsId, text) {
+    var ts = document.createElement("H3");
+    ts.setAttribute("id", tsId + "-header");
+    ts.textContent = text;
+    ts.addEventListener("click", function () { toggleResults(tsId); });
+    results.appendChild(ts);
+    return ts;
+}
+
+function addTestSuiteDiv(tsId) {
+    var ts = document.createElement("DIV");
+    ts.setAttribute("id", tsId);
+    results.appendChild(ts);
+    return ts;
+}
+
+function show_result(appendTo, result, detail) {
     var header, details;
-	results = document.getElementById("results");
 	header = document.createElement("P");
 	header.textContent = result;
     header.classList.add("result");
-	results.appendChild(header);
+	appendTo.appendChild(header);
     
     if (detail) {
         header.classList.add("failed");
         details = document.createElement("P");
         details.textContent = detail;
         details.classList.add("details");
-        results.appendChild(details);
-    } else {
-        header.classList.add("passed");
-    }
+        appendTo.appendChild(details);
+    } 
+}
+
+function toggleResults(id) {
+    document.getElementById(id).classList.toggle('hidden');
 }
 
 function assertEquals(obj1, obj2) {
@@ -28,11 +45,13 @@ function assertEquals(obj1, obj2) {
 }
 
 window.onload = function () {
-    var testSuite, test;
+    var testSuites, testSuite, test, tsId, header, section, count, countFailed;
     
     results = document.getElementById("results");
 
-    testSuite = {
+    testSuites = [];
+    testSuites.push({
+        name: "extractCommand",
         extractCommand_nominal: function () {
             assertEquals('aaa', extractCommand('aaa'));
         },
@@ -41,7 +60,11 @@ window.onload = function () {
         },
         extractCommand_threeWords: function () {
             assertEquals('aaa', extractCommand('    aaa    bbb  cc   '));
-        },
+        }
+    });
+    
+    testSuites.push({
+        name: "fileSystemObject",
         fileAppend: function () {
             var file = new File('test', null, {});
             file.content = 'prefix';
@@ -78,16 +101,35 @@ window.onload = function () {
             var file = new Directory('name', new Directory('parent', new Directory('', null, {}), {}), {});
             assertEquals('/parent/name/', file.path());
         }
-    };
-
-    for (test in testSuite) {
-        if (testSuite.hasOwnProperty(test)) {
-            try {
-                testSuite[test]();
-                show_result(test + " PASSED.");
-            } catch (err) {
-                show_result(test + " FAILED!", err);
+    });
+    
+    for (var i = 0; i < testSuites.length; i++) {
+        testSuite = testSuites[i];
+        tsId = "ts" + i;
+        header = addTestSuiteHeader(tsId, testSuite.name);
+        section = addTestSuiteDiv(tsId);
+        count = 0;
+        countFailed = 0;
+        for (test in testSuite) {
+            if (testSuite[test] instanceof Function) {
+                try {
+                    testSuite[test]();
+                    show_result(section, test + " - PASSED.");
+                } catch (err) {
+                    show_result(section, test + " - FAILED!", err);
+                    countFailed++;
+                }
+                count++;
             }
         }
+        if (!countFailed) {
+            header.classList.add("passed");
+            header.textContent += " - PASSED (" + count + " tests)";
+            header.click();
+        } else {
+            header.textContent += " - FAILED (" + countFailed + " out of " + count + " tests)";
+            header.classList.add("failed");
+        } 
     }
+    
 };

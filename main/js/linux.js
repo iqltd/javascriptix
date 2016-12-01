@@ -70,32 +70,39 @@ function Directory(name, parent, user) {
     };
 }
 
-function parsePath(path) {
-    var index, startingIndex, parentDir, dir, crtName;
+
+function parsePath(path, parentDir, extractChild) {
+    var index, startingIndex, dir, crtName;
     
-    if (path.charAt(0) === '/') {
-        startingIndex = 1;
-        parentDir = fs.root;
-    } else {
-        startingIndex = 0;
-        parentDir = workingDirectory;
-    }
-    
+    startingIndex = 0;
     index = 0;
     while (index < path.length && parentDir) {
         index = path.indexOf('/', startingIndex);
         index = index === -1 ? path.length : index;
         if (index - startingIndex > 0) {
             crtName = path.substring(startingIndex, index);
-            dir = parentDir.content[crtName];
+            dir = extractChild(parentDir, crtName);
             parentDir = dir;
         }
         startingIndex = index + 1;
     }
+     
     if (!dir) {
         throw crtName + ": No such file or directory";
     }
     return dir;
+}
+
+function parseAbsolutePath(path, extractChild) {
+    return parsePath(path.substring(1), fs.root, extractChild);
+}
+
+function parseRelativePath(path, extractChild) {
+    return parsePath(path, workingDirectory, extractChild);
+}
+
+function isAbsolute(path) {
+    return path.charAt(0) === '/';
 }
 
 fs = {
@@ -110,7 +117,8 @@ fs = {
         return newFile;
     },
     get: function (path) {
-        return parsePath(path);
+        var extractChild = function (dir, name) { return dir.content[name]; };
+        return isAbsolute(path) ? parseAbsolutePath(path, extractChild) : parseRelativePath(path, extractChild);
     }
 };
 

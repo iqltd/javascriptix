@@ -17,8 +17,19 @@
 
 p.details {
     margin: 0;
+    margin-left: 30px;
 }
 
 p {
     margin-bottom: 0;
+    margin-left: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+h3:hover {
+    text-decoration: underline;
+    cursor: pointer;
 }
