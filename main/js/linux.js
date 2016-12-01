@@ -72,7 +72,7 @@ function Directory(name, parent, user) {
 
 
 function parsePath(path, parentDir, extractChild) {
-    var index, startingIndex, dir, crtName;
+    var index, startingIndex, dir = parentDir, crtName;
     
     startingIndex = 0;
     index = 0;

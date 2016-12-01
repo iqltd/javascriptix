@@ -103,6 +103,34 @@ window.onload = function () {
         }
     });
     
+    testSuites.push({
+        name: "parsePath",
+        parsePath_level1_normal: function () {
+            var found = {};
+            assertEquals(found, parsePath("/aaa", {}, function () { return found; }));
+        },
+        parsePath_level1_slashesAtTheEnd: function () {
+            var found = {};
+            assertEquals(found, parsePath("/aaa////", {}, function () { return found; }));
+        },
+        parsePath_level1_moreSlashes: function () {
+            var found = {};
+            assertEquals(found, parsePath("///aaa", {}, function () { return found; }));
+        },
+        parsePath_root_normal: function () {
+            var root = {};
+            assertEquals(root, parsePath("/", root, function () { return {}; }));
+        },
+        parsePath_root_moreSlashes: function () {
+            var root = {};
+            assertEquals(root, parsePath("//////", root, function () { return {}; }));
+        },
+        parsePath_level10_moreSlashes: function () {
+            var found = {};
+            assertEquals(found, parsePath("///aaa/a ;   []/ ]   ;////////   a/  / /   /aa/s///'", {}, function () { return found; }));
+        },
+    });
+    
     for (var i = 0; i < testSuites.length; i++) {
         testSuite = testSuites[i];
         tsId = "ts" + i;
