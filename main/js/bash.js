@@ -1,6 +1,7 @@
 'use strict';
 
 function extractCommand(input) {
+    input = input.trim();
 	var idx = input.slice(0).indexOf(' '),
 	    word = idx === -1 ? input
 		    : input.substr(0, idx);

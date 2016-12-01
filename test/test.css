@@ -1,0 +1,24 @@
+.result {
+    font-size: 1em;
+    font-weight: 500;
+}
+
+.passed {
+    color: green;
+}
+
+.failed {
+    color: red;
+}
+
+.details {
+    font-size: 0.7em;
+}
+
+p.details {
+    margin: 0;
+}
+
+p {
+    margin-bottom: 0;
+}
