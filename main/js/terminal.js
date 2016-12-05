@@ -1,18 +1,13 @@
 window.onload = function () {
     'use strict';
 
-    var stdin = document.getElementById("stdin"),
-        results = document.getElementById("results"),
-        prompt = document.getElementById("prompt"),
+    var j$Div = document.getElementById("javashcript"),
+        stdin = document.createElement("TEXTAREA"),
+        results = document.createElement("DIV"),
+        prompt = document.createElement("SPAN"),
         promptString = '$ ',
         j$ = window.j$;
-    
-    prompt.textContent = promptString + ' ';
-    
-    function getStdin() {
-        stdin = stdin || document.getElementById("stdin");
-    }
-    
+        
     function readUserInput() {
         return stdin.value.trim();
     }
@@ -46,7 +41,7 @@ window.onload = function () {
             var userInput = readUserInput();
             show(userInput, true);
             try {
-                show(j$.bash(userInput));
+                show(j$.bash.interpret(userInput));
             } catch (err) {
                 show(err);
             }
@@ -55,6 +50,24 @@ window.onload = function () {
             return false;
         }
     }
+    
+    stdin.id = "stdin";
+    stdin.classList.add("commandText");
+    stdin.classList.add("normalText");
+    stdin.addEventListener("keypress", listen);
+    
+    results.id = "results";
+    results.classList.add("commandText");
+    results.classList.add("normalText");
+    
+    prompt.id = "prompt";
+    prompt.classList.add("commandText");
+    prompt.classList.add("promptText");
+    prompt.textContent = promptString + ' ';
+
+    j$Div.appendChild(results);
+    j$Div.appendChild(prompt);
+    j$Div.appendChild(stdin);
     
     j$.currentUser = j$.users.guest;
     j$.fs.init();
