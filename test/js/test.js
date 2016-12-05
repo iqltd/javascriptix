@@ -2,6 +2,10 @@
 
 var results;
 
+function toggleResults(id) {
+    document.getElementById(id).classList.toggle('hidden');
+}
+
 function addTestSuiteHeader(tsId, text) {
     var ts = document.createElement("H3");
     ts.setAttribute("id", tsId + "-header");
@@ -31,11 +35,7 @@ function show_result(appendTo, result, detail) {
         details.textContent = detail;
         details.classList.add("details");
         appendTo.appendChild(details);
-    } 
-}
-
-function toggleResults(id) {
-    document.getElementById(id).classList.toggle('hidden');
+    }
 }
 
 function assertEquals(obj1, obj2) {
@@ -45,90 +45,92 @@ function assertEquals(obj1, obj2) {
 }
 
 window.onload = function () {
-    var testSuites, testSuite, test, tsId, header, section, count, countFailed;
+    var j$, user, testSuites, testSuite, test, tsId, header, section, count, countFailed;
     
+    j$ = window.j$;
     results = document.getElementById("results");
 
     testSuites = [];
     testSuites.push({
         name: "extractCommand",
         extractCommand_nominal: function () {
-            assertEquals('aaa', extractCommand('aaa'));
+            assertEquals('aaa', j$.bash.extractCommand('aaa'));
         },
         extractCommand_spaces: function () {
-            assertEquals('aaa', extractCommand('    aaa    '));
+            assertEquals('aaa', j$.bash.extractCommand('    aaa    '));
         },
         extractCommand_threeWords: function () {
-            assertEquals('aaa', extractCommand('    aaa    bbb  cc   '));
+            assertEquals('aaa', j$.bash.extractCommand('    aaa    bbb  cc   '));
         }
     });
+    
+    user = j$.users.guest;
     
     testSuites.push({
         name: "fileSystemObject",
         fileAppend: function () {
-            var file = new File('test', null, {});
+            var file = new j$.fs.touch('test', j$.fs.root, user);
             file.content = 'prefix';
             file.append('appended');
             assertEquals('prefixappended', file.content);
         },
         fileOverwrite: function () {
-            var file = new File('test', null, {});
+            var file = new j$.fs.touch('test', j$.fs.root, user);
             file.content = 'oldtext';
             file.overwrite('newtext');
             assertEquals('newtext', file.content);
         },
-        filePath_root: function () {
-            var file = new File('name', null, {});
-            assertEquals('name', file.path());
-        },
         filePath_level1: function () {
-            var file = new File('name', new Directory('', null, {}), {});
+            var file = j$.fs.touch('name', j$.fs.root, user);
             assertEquals('/name', file.path());
         },
-        dirPath_level2: function () {
-            var file = new File('name', new Directory('parent', new Directory('', null, {}), {}), {});
+        filePath_level2: function () {
+            var file = j$.fs.touch('name', j$.fs.mkdir('parent', j$.fs.root, user), user);
             assertEquals('/parent/name', file.path());
         },
         dirPath_root: function () {
-            var file = new Directory('name', null, {});
+            var file = j$.fs.mkdir('name', null, user);
             assertEquals('name/', file.path());
         },
         dirPath_level1: function () {
-            var file = new Directory('name', new Directory('', null, {}), {});
+            var file = j$.fs.mkdir('name', j$.fs.root, user);
             assertEquals('/name/', file.path());
         },
         dirPath_level2: function () {
-            var file = new Directory('name', new Directory('parent', new Directory('', null, {}), {}), {});
+            var file = j$.fs.mkdir('name', j$.fs.mkdir('parent', j$.fs.root, user), user);
             assertEquals('/parent/name/', file.path());
         }
     });
     
+    j$.fs.mkdir('level1', j$.fs.root, user);
+    j$.fs.touch('fileNameWithStrangeCharacters []', j$.fs.root, user);
+    
     testSuites.push({
         name: "parsePath",
-        parsePath_level1_normal: function () {
-            var found = {};
-            assertEquals(found, parsePath("/aaa", {}, function () { return found; }));
+        fsGet_level1_normal: function () {
+            var found = j$.fs.mkdir('level1', j$.fs.root, user);
+            assertEquals(found, j$.fs.get("/level1"));
         },
-        parsePath_level1_slashesAtTheEnd: function () {
-            var found = {};
-            assertEquals(found, parsePath("/aaa////", {}, function () { return found; }));
+        fsGet_level1_slashesAtTheEnd: function () {
+            var found = j$.fs.mkdir('level1', j$.fs.root, user);
+            assertEquals(found, j$.fs.get("/level1////"));
         },
-        parsePath_level1_moreSlashes: function () {
-            var found = {};
-            assertEquals(found, parsePath("///aaa", {}, function () { return found; }));
+        fsGet_level1_moreSlashes: function () {
+            var found = j$.fs.mkdir('level1', j$.fs.root, user);
+            assertEquals(found, j$.fs.get("///level1"));
         },
-        parsePath_root_normal: function () {
-            var root = {};
-            assertEquals(root, parsePath("/", root, function () { return {}; }));
+        fsGet_root_normal: function () {
+            assertEquals(j$.fs.root, j$.fs.get("/"));
         },
-        parsePath_root_moreSlashes: function () {
-            var root = {};
-            assertEquals(root, parsePath("//////", root, function () { return {}; }));
+        fsGet_root_moreSlashes: function () {
+            assertEquals(j$.fs.root, j$.fs.get("//////"));
         },
-        parsePath_level10_moreSlashes: function () {
-            var found = {};
-            assertEquals(found, parsePath("///aaa/a ;   []/ ]   ;////////   a/  / /   /aa/s///'", {}, function () { return found; }));
-        },
+        fsGet_fileNameWithStrangeCharacters_moreSlashes: function () {
+            var level1 = j$.fs.mkdir('level1', j$.fs.root, user),
+                fileName = "fileNameWithStrangeCharacters !@#$%^&*()_-+={}[];:\\|'",
+                found = j$.fs.touch(fileName, level1, user);
+            assertEquals(found, j$.fs.get("////level1//////////////////" + fileName + "//////////////"));
+        }
     });
     
     for (var i = 0; i < testSuites.length; i++) {
@@ -159,5 +161,4 @@ window.onload = function () {
             header.classList.add("failed");
         } 
     }
-    
 };
