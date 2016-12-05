@@ -49,7 +49,7 @@
         }
 
         if (!dir) {
-            throw crtName + ": No such file or directory";
+            throw path + ": No such file or directory";
         }
         return dir;
     }
@@ -169,6 +169,7 @@
                 return this.user.name + "@" + this.env.HOSTNAME + " " + promptSymbol + " ";
             }
         };
+        j$.initBins();
         j$.fs.initLocal();
         j$.context.directory = j$.fs.get("/home/guest");
     };
