@@ -130,7 +130,7 @@
             var i, addDir;
             addDir = function (parent, names, user) {
                 for (i = 0; i < names.length; i++) {
-                    j$.fs.mkdir(parent, names[i], user);
+                    j$.fs.mkdir(names[i], parent, user);
                 }
             };
             addDir(this.root, ['bin', 'dev', 'etc', 'home', 'lib', 'mnt', 'opt', 'proc', 'tmp', 'usr', 'var'], j$.users.root);

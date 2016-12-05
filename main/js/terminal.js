@@ -1,13 +1,18 @@
-(function (j$) {
+window.onload = function () {
     'use strict';
 
     var stdin = document.getElementById("stdin"),
         results = document.getElementById("results"),
         prompt = document.getElementById("prompt"),
-        promptString = '$ ';
+        promptString = '$ ',
+        j$ = window.j$;
     
     prompt.textContent = promptString + ' ';
-
+    
+    function getStdin() {
+        stdin = stdin || document.getElementById("stdin");
+    }
+    
     function readUserInput() {
         return stdin.value.trim();
     }
@@ -50,14 +55,8 @@
             return false;
         }
     }
-}(window.j$ = window.j$ || {}));
-
-
-window.onload = function () {
-    'use strict';
     
-    var j$ = window.j$;
     j$.currentUser = j$.users.guest;
-    j$.initFs();
+    j$.fs.init();
     j$.workingDirectory = j$.fs.get('/home/guest');
 };
