@@ -1,5 +1,8 @@
 (function (j$) {
     "use strict";
+    
+    var promptSymbol = "$",
+        FileType = Object.freeze({FILE: 'f', DIRECTORY: 'd', BLOCK: 'b', CHARACTER: 'c', LINK: 'l'});
 
     j$.groups = {
         root: {
@@ -56,14 +59,20 @@
     }
 
     function parseRelativePath(path, extractChild) {
-        return parsePath(path, j$.workingDirectory, extractChild);
+        return parsePath(path, j$.context.directory, extractChild);
     }
 
     function isAbsolute(path) {
         return path.charAt(0) === '/';
     }
     
-    var FileType = Object.freeze({FILE: 'f', DIRECTORY: 'd', BLOCK: 'b', CHARACTER: 'c', LINK: 'l'});
+    function getRights() {
+        var mask = j$.context ? j$.context.umask : null;
+        if (mask) {
+            mask = "022";
+        }
+        return parseInt("777", 8) - parseInt(mask, 8);
+    }
     
     function FileSystemObject(name, parent, user) {
         this.name = name;
@@ -71,6 +80,7 @@
         this.inode = 0;
         this.user = user;
         this.group = user.group;
+        this.rights = getRights();
         this.path = function () {
             var base, ending;
             base = (this.parent) ? this.parent.path() : '';
@@ -126,15 +136,40 @@
             return isAbsolute(path) ? parseAbsolutePath(path, extractChild) : parseRelativePath(path, extractChild);
         },
         
-        init: function () {
+        initGlobal: function () {
             var i, addDir;
             addDir = function (parent, names, user) {
                 for (i = 0; i < names.length; i++) {
                     j$.fs.mkdir(names[i], parent, user);
                 }
             };
-            addDir(this.root, ['bin', 'dev', 'etc', 'home', 'lib', 'mnt', 'opt', 'proc', 'tmp', 'usr', 'var'], j$.users.root);
-            addDir(this.get('/home'), ['guest'], j$.users.guest);
+            addDir(this.root, ['bin', 'dev', 'etc', 'home', 'lib', 'mnt', 'opt', 'proc', 'sbin', 'tmp', 'usr', 'var'], j$.users.root);
+            addDir(this.get('/usr'), ['bin', 'sbin', 'local'], j$.fs.root);
+            addDir(this.get('/usr/local'), ['bin'], j$.fs.root);
+        },
+        
+        initLocal: function () {
+            this.mkdir('guest', this.get('/home'), j$.context.user);
         }
+    };
+    
+    j$.init = function () {
+        j$.fs.initGlobal();
+        j$.context = {
+            user: j$.users.guest,
+            
+            env: {
+                HOSTNAME: "javashcript",
+                PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            },
+            
+            umask: "022",
+            
+            promptString: function () {
+                return this.user.name + "@" + this.env.HOSTNAME + " " + promptSymbol + " ";
+            }
+        };
+        j$.fs.initLocal();
+        j$.context.directory = j$.fs.get("/home/guest");
     };
 }(window.j$ = window.j$ || {}));

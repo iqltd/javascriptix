@@ -5,7 +5,6 @@ window.onload = function () {
         stdin = document.createElement("TEXTAREA"),
         results = document.createElement("DIV"),
         prompt = document.createElement("SPAN"),
-        promptString = '$ ',
         j$ = window.j$;
         
     function readUserInput() {
@@ -26,7 +25,7 @@ window.onload = function () {
             span = document.createElement("SPAN");
             span.classList.add("commandText");
             span.classList.add("promptText");
-            span.textContent = promptString;
+            span.textContent = j$.context.promptString();
             line.appendChild(span);
         }
         if (text) {
@@ -51,25 +50,26 @@ window.onload = function () {
         }
     }
     
-    stdin.id = "stdin";
-    stdin.classList.add("commandText");
-    stdin.classList.add("normalText");
-    stdin.addEventListener("keypress", listen);
-    
-    results.id = "results";
-    results.classList.add("commandText");
-    results.classList.add("normalText");
-    
-    prompt.id = "prompt";
-    prompt.classList.add("commandText");
-    prompt.classList.add("promptText");
-    prompt.textContent = promptString + ' ';
+    function buildUi() {
+        stdin.id = "stdin";
+        stdin.classList.add("commandText");
+        stdin.classList.add("normalText");
+        stdin.addEventListener("keypress", listen);
 
-    j$Div.appendChild(results);
-    j$Div.appendChild(prompt);
-    j$Div.appendChild(stdin);
+        results.id = "results";
+        results.classList.add("commandText");
+        results.classList.add("normalText");
+
+        prompt.id = "prompt";
+        prompt.classList.add("commandText");
+        prompt.classList.add("promptText");
+        prompt.textContent = j$.context.promptString();
+
+        j$Div.appendChild(results);
+        j$Div.appendChild(prompt);
+        j$Div.appendChild(stdin);
+    }
     
-    j$.currentUser = j$.users.guest;
-    j$.fs.init();
-    j$.workingDirectory = j$.fs.get('/home/guest');
+    j$.init();
+    buildUi();
 };
