@@ -159,7 +159,7 @@
             user: j$.users.guest,
             
             env: {
-                HOSTNAME: "javashcript",
+                HOSTNAME: "javascriptix",
                 PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
             },
             

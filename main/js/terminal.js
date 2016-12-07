@@ -1,7 +1,7 @@
 window.onload = function () {
     'use strict';
 
-    var j$Div = document.getElementById("javashcript"),
+    var j$Div = document.getElementById("javascriptix"),
         stdin = document.createElement("TEXTAREA"),
         results = document.createElement("DIV"),
         prompt = document.createElement("SPAN"),
