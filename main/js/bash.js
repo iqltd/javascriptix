@@ -3,8 +3,6 @@
     
     var metacharacters;
     
-    metacharacters = 
-    
     j$.bash = {};
     
     j$.bash.extractCommand = function (input) {
@@ -16,7 +14,10 @@
     };
     
     j$.bash.tokenize = function (input) {
-        var i, start = 0, closing = null, tokens = [];
+        var i = 0,
+            start = 0,
+            closing = null,
+            tokens = [];
         
         function addToken(index) {
             if (index >= 0 && index >= start) {
@@ -35,24 +36,27 @@
         
         function checkIfMeta(index) {
             switch (input[index]) {
-                case ' ':
-                case '\t': 
-                case '\n': 
-                case '|':
-                case '&':
-                case ';':
-                case '<':
-                case '>':
-                case '(':
-                case ')':
-                    addToken(index - 1);
-                    addToken(index);
-                    break;
-                case '\'':
-                case '"':
-                    addToken(index - 1);
-                    closing = input[index];
-                    break;
+            case ' ':
+            case '\t':
+                addToken(index - 1);
+                start++;
+                break;
+            case '\n':
+            case '|':
+            case '&':
+            case ';':
+            case '<':
+            case '>':
+            case '(':
+            case ')':
+                addToken(index - 1);
+                addToken(index);
+                break;
+            case '"':
+            case "'":
+                addToken(index - 1);
+                closing = input[index];
+                break;
             }
         }
         
@@ -68,13 +72,20 @@
     };
 
     j$.bash.interpret = function (userInput) {
-        var command, file;
+        var tokens = j$.bash.tokenize(userInput),
+            file,
+            command,
+            i = 0;
         if (userInput.length > 0) {
-            command = j$.bash.extractCommand(userInput);
-            file = j$.fs.get(command);
+            command = tokens[0];
+            if (userInput.indexOf('/') > -1) {
+                file = j$.fs.get(command);
+            } else {
+                file = j$.fs.getFromPATH(command);
+            }
             if (file) {
                 if (file.content instanceof Function) {
-                    return file.content();
+                    return file.content(tokens);
                 } else {
                     j$.bash(file.content);
                 }

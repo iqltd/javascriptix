@@ -31,8 +31,12 @@
             home: "/home/guest"
         }
     };
+    
+    function extractChild(dir, name) {
+        return dir.content[name];
+    }
 
-    function parsePath(path, parentDir, extractChild) {
+    function parsePath(path, parentDir, strict) {
         var index, startingIndex, dir = parentDir, crtName;
 
         startingIndex = 0;
@@ -48,18 +52,18 @@
             startingIndex = index + 1;
         }
 
-        if (!dir) {
+        if (strict && !dir) {
             throw new Error(path + ": No such file or directory");
         }
         return dir;
     }
 
-    function parseAbsolutePath(path, extractChild) {
-        return parsePath(path.substring(1), j$.fs.root, extractChild);
+    function parseAbsolutePath(path, strict) {
+        return parsePath(path.substring(1), j$.fs.root, strict);
     }
 
-    function parseRelativePath(path, extractChild) {
-        return parsePath(path, j$.context.directory, extractChild);
+    function parseRelativePath(path, strict) {
+        return parsePath(path, j$.context.directory, strict);
     }
 
     function isAbsolute(path) {
@@ -132,8 +136,16 @@
         },
         
         get: function (path) {
-            var extractChild = function (dir, name) { return dir.content[name]; };
-            return isAbsolute(path) ? parseAbsolutePath(path, extractChild) : parseRelativePath(path, extractChild);
+            return isAbsolute(path) ? parseAbsolutePath(path, true) : parseRelativePath(path, true);
+        },
+        
+        getFromPATH: function (filename) {
+            var i = 0, file, dirs = j$.context.env.PATH.split(':');
+            while (i < dirs.length && !file) {
+                file = parseAbsolutePath(dirs[i] + '/' + filename, false);
+                i++;
+            }
+            return file;
         },
         
         initGlobal: function () {

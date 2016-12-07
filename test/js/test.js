@@ -78,19 +78,6 @@ window.onload = function () {
     results = document.getElementById("results");
 
     testSuites = [];
-    testSuites.push({
-        name: "extractCommand",
-        extractCommand_nominal: function () {
-            assertEquals('aaa', j$.bash.extractCommand('aaa'));
-        },
-        extractCommand_spaces: function () {
-            assertEquals('aaa', j$.bash.extractCommand('    aaa    '));
-        },
-        extractCommand_threeWords: function () {
-            assertEquals('aaa', j$.bash.extractCommand('    aaa    bbb  cc   '));
-        }
-    });
-    
     user = j$.users.guest;
     
     testSuites.push({
@@ -163,27 +150,27 @@ window.onload = function () {
     testSuites.push({
         name: "j$.bash.tokenize",
         tokenize_delimitedBySpace: function () {
-            var found = ['a', ' ', 'bb', ' ', 'ccc'];
+            var found = ['a', 'bb', 'ccc'];
             assertEquals(found, j$.bash.tokenize('a bb ccc'), simpleArrayEquals);
         },
         tokenize_delimitedBySpaces: function () {
-            var found = [' ', 'a', ' ', ' ', 'bb', ' '];
+            var found = ['a', 'bb'];
             assertEquals(found, j$.bash.tokenize(' a  bb '), simpleArrayEquals);
         },
         tokenize_delimitedByAnyMetacharacter: function () {
-            var found = ['1', ' ', '2', '\t', '3', '\n', '4', '|', '5', '&', '6', ';', '7', '(', '8', ')', '9', '<', '10', '>', '11' ];
+            var found = ['1', '2', '3', '\n', '4', '|', '5', '&', '6', ';', '7', '(', '8', ')', '9', '<', '10', '>', '11' ];
             assertEquals(found, j$.bash.tokenize('1 2\t3\n4|5&6;7(8)9<10>11'), simpleArrayEquals);
         },
         tokenize_delimitedByMultipleMetacharacters: function () {
-            var found = ['1', ' ', '\t', '\n', '|', '&', ';', '(', ')', '<', '>', '2'];
+            var found = ['1', '\n', '|', '&', ';', '(', ')', '<', '>', '2'];
             assertEquals(found, j$.bash.tokenize('1 \t\n|&;()<>2'), simpleArrayEquals);
         },
         tokenize_singleQuotedDelimitedBySpace: function () {
-            var found = ["'single quoted'", " ", "' also single quoted   '"];
+            var found = ["'single quoted'", "' also single quoted   '"];
             assertEquals(found, j$.bash.tokenize("'single quoted' ' also single quoted   '"), simpleArrayEquals);
         },
         tokenize_doubleQuotedDelimitedBySpace: function () {
-            var found = ['"double quoted"', ' ', '" also double quoted   "'];
+            var found = ['"double quoted"', '" also double quoted   "'];
             assertEquals(found, j$.bash.tokenize('"double quoted" " also double quoted   "'), simpleArrayEquals);
         }
     });
