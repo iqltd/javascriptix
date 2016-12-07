@@ -105,6 +105,13 @@
         this.overwrite = function (text) {
             this.content = text;
         };
+        this.execute = function (args) {
+            if (this.content instanceof Function) {
+                return this.content(args);
+            } else {
+                j$.bash(this.content);
+            }
+        };
     }
 
     function Directory(name, parent, user) {

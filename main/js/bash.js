@@ -1,9 +1,7 @@
 (function (j$) {
     'use strict';
     
-    var metacharacters;
-    
-    j$.bash = {};
+    j$.bash = j$.bash || {};
     
     j$.bash.extractCommand = function (input) {
         input = input.trim();
@@ -72,27 +70,36 @@
     };
 
     j$.bash.interpret = function (userInput) {
-        var tokens = j$.bash.tokenize(userInput),
-            file,
-            command,
-            i = 0;
-        if (userInput.length > 0) {
-            command = tokens[0];
-            if (userInput.indexOf('/') > -1) {
-                file = j$.fs.get(command);
-            } else {
-                file = j$.fs.getFromPATH(command);
-            }
-            if (file) {
-                if (file.content instanceof Function) {
-                    return file.content(tokens);
-                } else {
-                    j$.bash(file.content);
-                }
+        var tokens = j$.bash.tokenize(userInput);
+        
+        function isPath(command) {
+            return command.indexOf('/') > -1;
+        }
+        
+        function isBuiltin(command) {
+            return j$.bash.builtins.hasOwnProperty(command);
+        }
+        
+        function execute(executable, command, args) {
+            if (executable) {
+                return executable.execute(args);
             } else {
                 throw new Error(command + ': command not found');
             }
         }
-        return '';
+        
+        function runCommand(command, args) {
+            if (isPath(command)) {
+                return execute(j$.fs.get(command), command, args);
+            } else if (isBuiltin(command)) {
+                return j$.bash.builtins[command](args);
+            } else {
+                return execute(j$.fs.getFromPATH(command), command, args);
+            }
+        }
+        
+        if (userInput.length > 0) {
+            return runCommand(tokens[0], tokens);
+        }
     };
 }(window.j$ = window.j$ || {}));
