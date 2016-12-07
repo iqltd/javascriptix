@@ -23,7 +23,7 @@ function addTestSuiteDiv(tsId) {
 }
 
 function show_result(appendTo, result, detail) {
-    var header, details;
+    var header, details, fileName;
 	header = document.createElement("P");
 	header.textContent = result;
     header.classList.add("result");
@@ -32,20 +32,47 @@ function show_result(appendTo, result, detail) {
     if (detail) {
         header.classList.add("failed");
         details = document.createElement("P");
-        details.textContent = detail;
+        if (detail.fileName) {
+            fileName = detail.fileName.substr(detail.fileName.lastIndexOf('/') + 1);
+        }
+        details.textContent = [detail, ' - ', fileName, ' (line ', detail.lineNumber, ')'].join();
         details.classList.add("details");
         appendTo.appendChild(details);
     }
 }
 
-function assertEquals(obj1, obj2) {
-    if (obj1 !== obj2) {
-        throw "Assertion failed. [" + obj1 + "] not equal to [" + obj2 + "]";
+function simpleEquals(o1, o2) {
+    return o1 === o2;
+}
+
+function assertEquals(obj1, obj2, equals) {
+    if (!equals) {
+        equals = simpleEquals;
+    }
+    if (!equals(obj1, obj2)) {
+        throw new Error("Assertion failed. [" + obj1 + "] not equal to [" + obj2 + "]");
     }
 }
 
+function simpleArrayEquals(arr1, arr2) {
+    var i, length;
+    
+    if (arr1 === arr2) {
+        return true;
+    }
+    if (arr1 === null || arr2 === null || arr1.length !== arr2.length) {
+        return false;
+    }
+    for (i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 window.onload = function () {
-    var j$, user, testSuites, testSuite, test, tsId, header, section, count, countFailed;
+    var j$, user, testSuites, testSuite, test, tsId, header, section, count, countFailed, i;
     
     j$ = window.j$;
     results = document.getElementById("results");
@@ -133,7 +160,35 @@ window.onload = function () {
         }
     });
     
-    for (var i = 0; i < testSuites.length; i++) {
+    testSuites.push({
+        name: "j$.bash.tokenize",
+        tokenize_delimitedBySpace: function () {
+            var found = ['a', ' ', 'bb', ' ', 'ccc'];
+            assertEquals(found, j$.bash.tokenize('a bb ccc'), simpleArrayEquals);
+        },
+        tokenize_delimitedBySpaces: function () {
+            var found = [' ', 'a', ' ', ' ', 'bb', ' '];
+            assertEquals(found, j$.bash.tokenize(' a  bb '), simpleArrayEquals);
+        },
+        tokenize_delimitedByAnyMetacharacter: function () {
+            var found = ['1', ' ', '2', '\t', '3', '\n', '4', '|', '5', '&', '6', ';', '7', '(', '8', ')', '9', '<', '10', '>', '11' ];
+            assertEquals(found, j$.bash.tokenize('1 2\t3\n4|5&6;7(8)9<10>11'), simpleArrayEquals);
+        },
+        tokenize_delimitedByMultipleMetacharacters: function () {
+            var found = ['1', ' ', '\t', '\n', '|', '&', ';', '(', ')', '<', '>', '2'];
+            assertEquals(found, j$.bash.tokenize('1 \t\n|&;()<>2'), simpleArrayEquals);
+        },
+        tokenize_singleQuotedDelimitedBySpace: function () {
+            var found = ["'single quoted'", " ", "' also single quoted   '"];
+            assertEquals(found, j$.bash.tokenize("'single quoted' ' also single quoted   '"), simpleArrayEquals);
+        },
+        tokenize_doubleQuotedDelimitedBySpace: function () {
+            var found = ['"double quoted"', ' ', '" also double quoted   "'];
+            assertEquals(found, j$.bash.tokenize('"double quoted" " also double quoted   "'), simpleArrayEquals);
+        }
+    });
+    
+    for (i = 0; i < testSuites.length; i++) {
         testSuite = testSuites[i];
         tsId = "ts" + i;
         header = addTestSuiteHeader(tsId, testSuite.name);
@@ -159,6 +214,6 @@ window.onload = function () {
         } else {
             header.textContent += " - FAILED (" + countFailed + " out of " + count + " tests)";
             header.classList.add("failed");
-        } 
+        }
     }
 };

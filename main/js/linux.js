@@ -49,7 +49,7 @@
         }
 
         if (!dir) {
-            throw path + ": No such file or directory";
+            throw new Error(path + ": No such file or directory");
         }
         return dir;
     }

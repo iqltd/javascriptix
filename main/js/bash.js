@@ -1,6 +1,10 @@
 (function (j$) {
     'use strict';
     
+    var metacharacters;
+    
+    metacharacters = 
+    
     j$.bash = {};
     
     j$.bash.extractCommand = function (input) {
@@ -9,6 +13,58 @@
             word = idx === -1 ? input
                 : input.substr(0, idx);
         return word;
+    };
+    
+    j$.bash.tokenize = function (input) {
+        var i, start = 0, closing = null, tokens = [];
+        
+        function addToken(index) {
+            if (index >= 0 && index >= start) {
+                var token = input.substring(start, index + 1);
+                tokens.push(token);
+                start = index + 1;
+            }
+        }
+        
+        function checkIfComplete(index) {
+            if (input[index] === closing) {
+                addToken(index);
+                closing = null;
+            }
+        }
+        
+        function checkIfMeta(index) {
+            switch (input[index]) {
+                case ' ':
+                case '\t': 
+                case '\n': 
+                case '|':
+                case '&':
+                case ';':
+                case '<':
+                case '>':
+                case '(':
+                case ')':
+                    addToken(index - 1);
+                    addToken(index);
+                    break;
+                case '\'':
+                case '"':
+                    addToken(index - 1);
+                    closing = input[index];
+                    break;
+            }
+        }
+        
+        for (i = 0; i < input.length; i++) {
+            if (closing) {
+                checkIfComplete(i);
+            } else {
+                checkIfMeta(i);
+            }
+        }
+        addToken(i - 1);
+        return tokens;
     };
 
     j$.bash.interpret = function (userInput) {
@@ -23,7 +79,7 @@
                     j$.bash(file.content);
                 }
             } else {
-                throw command + ': command not found';
+                throw new Error(command + ': command not found');
             }
         }
         return '';

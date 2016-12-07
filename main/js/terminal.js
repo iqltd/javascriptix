@@ -42,7 +42,7 @@ window.onload = function () {
             try {
                 show(j$.bash.interpret(userInput));
             } catch (err) {
-                show(err);
+                show(err.message);
             }
 
             resetPrompt();
