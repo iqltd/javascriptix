@@ -28,7 +28,6 @@ window.onload = function () {
             span,
             info;
         results.appendChild(line);
-        text.replace(/\n/g, "<br />");
 
         if (showPromptText) {
             span = document.createElement("SPAN");

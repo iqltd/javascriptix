@@ -119,8 +119,19 @@
         this.base(name, parent, user);
         this.type = FileType.DIRECTORY;
         this.content = {};
+        this.content['.'] = this;
+        this.content['..'] = parent;
         this.getChild = function (name) {
             return this.content[name];
+        };
+        this.list = function () {
+            var file, files = [];
+            for (file in this.content) {
+                if (this.content.hasOwnProperty(file)) {
+                    files.push(file);
+                }
+            }
+            return files;
         };
     }
 
