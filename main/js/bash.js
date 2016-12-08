@@ -1,21 +1,20 @@
 (function (j$) {
     'use strict';
     
-    j$.bash = j$.bash || {};
+    var ongoing;
     
-    j$.bash.extractCommand = function (input) {
-        input = input.trim();
-        var idx = input.slice(0).indexOf(' '),
-            word = idx === -1 ? input
-                : input.substr(0, idx);
-        return word;
-    };
+    j$.bash = j$.bash || {};
     
     j$.bash.tokenize = function (input) {
         var i = 0,
             start = 0,
             closing = null,
-            tokens = [];
+            tokens = [],
+            err;
+        
+        if (ongoing) {
+            input = ongoing + '\n' + input;
+        }
         
         function addToken(index) {
             if (index >= 0 && index >= start) {
@@ -65,12 +64,31 @@
                 checkIfMeta(i);
             }
         }
+        if (closing) {
+            err = new Error();
+            ongoing = input;
+            err.statementIncomplete = true;
+            throw err;
+        }
         addToken(i - 1);
+        ongoing = null;
         return tokens;
     };
 
     j$.bash.interpret = function (userInput) {
         var tokens = j$.bash.tokenize(userInput);
+        
+        function stripQuotes(args) {
+            var i, arg;
+            for (i = 0; i < args.length; i++) {
+                arg = args[i];
+                if (arg && (arg[0] === "'" || arg[0] === '"')) {
+                    arg = arg.substr(1, arg.length - 2);
+                }
+                args[i] = arg;
+            }
+        }
+        stripQuotes(tokens);
         
         function isPath(command) {
             return command.indexOf('/') > -1;

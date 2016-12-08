@@ -6,12 +6,20 @@ window.onload = function () {
         results = document.createElement("DIV"),
         prompt = document.createElement("SPAN"),
         j$ = window.j$;
+    
+    j$.test = {};
         
     function readUserInput() {
         return stdin.value.trim();
     }
 
     function resetPrompt() {
+        prompt.textContent = j$.context.promptString();
+        stdin.value = '';
+    }
+    
+    function continueOnNextLine() {
+        prompt.textContent = '>';
         stdin.value = '';
     }
 
@@ -20,12 +28,13 @@ window.onload = function () {
             span,
             info;
         results.appendChild(line);
+        text.replace(/\n/g, "<br />");
 
         if (showPromptText) {
             span = document.createElement("SPAN");
             span.classList.add("commandText");
             span.classList.add("promptText");
-            span.textContent = j$.context.promptString();
+            span.textContent = prompt.textContent;
             line.appendChild(span);
         }
         if (text) {
@@ -34,18 +43,24 @@ window.onload = function () {
             line.appendChild(info);
         }
     }
+    
+    j$.test.processInput = function (userInput) {
+        show(userInput, true);
+        try {
+            show(j$.bash.interpret(userInput));
+        } catch (err) {
+            if (err.statementIncomplete) {
+                continueOnNextLine();
+                return;
+            }
+            show(err.message);
+        }
+        resetPrompt();
+    };
 
     function listen(e) {
         if (e.keyCode === 13) {
-            var userInput = readUserInput();
-            show(userInput, true);
-            try {
-                show(j$.bash.interpret(userInput));
-            } catch (err) {
-                show(err.message);
-            }
-
-            resetPrompt();
+            j$.test.processInput(readUserInput());
             return false;
         }
     }
@@ -63,8 +78,8 @@ window.onload = function () {
         prompt.id = "prompt";
         prompt.classList.add("commandText");
         prompt.classList.add("promptText");
-        prompt.textContent = j$.context.promptString();
-
+        resetPrompt();
+        
         j$Div.appendChild(results);
         j$Div.appendChild(prompt);
         j$Div.appendChild(stdin);

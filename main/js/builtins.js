@@ -16,9 +16,18 @@
             j$.context.directory = newDir;
         }
     }
+    
+    function echo(args) {
+        var i, message = '';
+        for (i = 1; i < args.length; i++) {
+            message += args[i] + ' ';
+        }
+        return message;
+    }
 
     j$.bash.builtins = {
-        cd: changeDirectory
+        cd: changeDirectory,
+        echo: echo
     };
     
 }(window.j$ = window.j$ || {}));
