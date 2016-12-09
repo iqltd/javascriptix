@@ -47,12 +47,14 @@
         this.user = user;
         this.group = user.group;
         this.rights = getRights();
+        this.isRoot = this.parent === null;
         this.path = function () {
-            var base, ending;
-            base = (this.parent) ? this.parent.path() : '';
-            ending = (this.type === FileType.DIRECTORY) ? '/' : '';
+            if (this.isRoot) {
+                return '/';
+            }
+            var ending = (this.isDirectory) ? '/' : '';
 
-            return base + this.name + ending;
+            return this.parent.path() + this.name + ending;
         };
     }
 
@@ -83,6 +85,7 @@
         this.content = {};
         this.content['.'] = this;
         this.content['..'] = parent;
+        this.isDirectory = true;
         this.getChild = function (name) {
             return this.content[name];
         };
@@ -98,7 +101,7 @@
     }
 
     j$.fs = {
-        root: new Directory("", null, j$.users.root),
+        root: new Directory("/", null, j$.users.root),
         
         mkdir: function (name, parent, user) {
             var newDir = new Directory(name, parent, user);
@@ -119,31 +122,47 @@
             return path.charAt(0) === '/';
         },
         
-        parsePath: function (path, parentDir, forgiving) {
-            var index, startingIndex, dir = parentDir, crtName, files = [];
+        parsePath: function (path) {
+            var index = 0,
+                startingIndex = 0,
+                files = [];
+            path = path.trim();
+            if (path.charAt(0) === '/') {
+                files.push('/');
+            }
 
-            startingIndex = 0;
-            index = 0;
-            while (index < path.length && parentDir) {
+            while (index < path.length) {
                 index = path.indexOf('/', startingIndex);
                 index = index === -1 ? path.length : index;
                 if (index - startingIndex > 0) {
-                    crtName = path.substring(startingIndex, index);
-                    dir = parentDir.getChild(crtName);
-                    parentDir = dir;
+                    files.push(path.substring(startingIndex, index));
                 }
                 startingIndex = index + 1;
             }
 
-            if (!forgiving && !dir) {
-                throw new Error(path + ": No such file or directory");
-            }
-            return dir;
+            return files;
         },
         
         get: function (path, forgiving) {
-            return this.isAbsolute(path) ? this.parsePath(path.substring(1), j$.fs.root, forgiving)
-                                         : this.parsePath(path, j$.context.directory, forgiving);
+            var file, index,
+                dirs = this.parsePath(path);
+            
+            if (dirs && dirs[0] === '/') {
+                file = this.root;
+                index = 1;
+            } else {
+                file = j$.context.directory;
+                index = 0;
+            }
+            
+            while (index < dirs.length && file) {
+                file = file.getChild(dirs[index]);
+                index++;
+            }
+            if (!forgiving && !file) {
+                throw new Error(path + ": No such file or directory");
+            }
+            return file;
         },
         
         initGlobal: function () {

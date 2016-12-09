@@ -53,6 +53,7 @@ window.onload = function () {
                 return;
             }
             show(err.message);
+            throw err;
         }
         resetPrompt();
     };
