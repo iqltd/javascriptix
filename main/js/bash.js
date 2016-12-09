@@ -106,13 +106,22 @@
             }
         }
         
+        function getFromPATH(filename) {
+            var i = 0, file, dirs = j$.context.env.PATH.split(':');
+            while (i < dirs.length && !file) {
+                file = j$.fs.get(dirs[i] + '/' + filename, true);
+                i++;
+            }
+            return file;
+        }
+        
         function runCommand(command, args) {
             if (isPath(command)) {
                 return execute(j$.fs.get(command), command, args);
             } else if (isBuiltin(command)) {
                 return j$.bash.builtins[command](args);
             } else {
-                return execute(j$.fs.getFromPATH(command), command, args);
+                return execute(getFromPATH(command), command, args);
             }
         }
         

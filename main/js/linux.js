@@ -32,44 +32,6 @@
         }
     };
     
-    function extractChild(dir, name) {
-        return dir.content[name];
-    }
-
-    function parsePath(path, parentDir, strict) {
-        var index, startingIndex, dir = parentDir, crtName;
-
-        startingIndex = 0;
-        index = 0;
-        while (index < path.length && parentDir) {
-            index = path.indexOf('/', startingIndex);
-            index = index === -1 ? path.length : index;
-            if (index - startingIndex > 0) {
-                crtName = path.substring(startingIndex, index);
-                dir = extractChild(parentDir, crtName);
-                parentDir = dir;
-            }
-            startingIndex = index + 1;
-        }
-
-        if (strict && !dir) {
-            throw new Error(path + ": No such file or directory");
-        }
-        return dir;
-    }
-
-    function parseAbsolutePath(path, strict) {
-        return parsePath(path.substring(1), j$.fs.root, strict);
-    }
-
-    function parseRelativePath(path, strict) {
-        return parsePath(path, j$.context.directory, strict);
-    }
-
-    function isAbsolute(path) {
-        return path.charAt(0) === '/';
-    }
-    
     function getRights() {
         var mask = j$.context ? j$.context.umask : null;
         if (mask) {
@@ -153,17 +115,35 @@
             return newFile;
         },
         
-        get: function (path) {
-            return isAbsolute(path) ? parseAbsolutePath(path, true) : parseRelativePath(path, true);
+        isAbsolute: function (path) {
+            return path.charAt(0) === '/';
         },
         
-        getFromPATH: function (filename) {
-            var i = 0, file, dirs = j$.context.env.PATH.split(':');
-            while (i < dirs.length && !file) {
-                file = parseAbsolutePath(dirs[i] + '/' + filename, false);
-                i++;
+        parsePath: function (path, parentDir, forgiving) {
+            var index, startingIndex, dir = parentDir, crtName, files = [];
+
+            startingIndex = 0;
+            index = 0;
+            while (index < path.length && parentDir) {
+                index = path.indexOf('/', startingIndex);
+                index = index === -1 ? path.length : index;
+                if (index - startingIndex > 0) {
+                    crtName = path.substring(startingIndex, index);
+                    dir = parentDir.getChild(crtName);
+                    parentDir = dir;
+                }
+                startingIndex = index + 1;
             }
-            return file;
+
+            if (!forgiving && !dir) {
+                throw new Error(path + ": No such file or directory");
+            }
+            return dir;
+        },
+        
+        get: function (path, forgiving) {
+            return this.isAbsolute(path) ? this.parsePath(path.substring(1), j$.fs.root, forgiving)
+                                         : this.parsePath(path, j$.context.directory, forgiving);
         },
         
         initGlobal: function () {
