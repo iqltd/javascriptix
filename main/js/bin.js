@@ -42,11 +42,30 @@
         }
         j$.fs.mkdir(dirname, parent, j$.context.user);
     }
+    
+    function touch(args) {
+        var path, dirs, filename, parent;
+        if (args.length < 2) {
+            throw new Error('missing operand');
+        }
+        path = args[1];
+        dirs = j$.fs.parsePath(path);
+        filename = dirs.pop();
+        if (j$.fs.get(path, true)) {
+            throw new Error("cannot create file '" + filename + "'. File exists");
+        }
+        parent = dirs ? j$.fs.get(dirs.join('/')) : j$.context.directory;
+        if (!parent) {
+            throw new Error("cannot create file '" + path + "'. No such file or directory");
+        }
+        j$.fs.touch(filename, parent, j$.context.user);
+    }
 
     j$.initBins = function () {
         j$.fs.touch('pwd', j$.fs.get('/bin'), j$.users.root, printWorkingDirectory);
         j$.fs.touch('ls', j$.fs.get('/bin'), j$.users.root, listFiles);
         j$.fs.touch('mkdir', j$.fs.get('/bin'), j$.users.root, makeDirectory);
+        j$.fs.touch('touch', j$.fs.get('/bin'), j$.users.root, touch);
         j$.fs.touch('whoami', j$.fs.get('/usr/bin'), j$.users.root, whoAmI);
     };
     
