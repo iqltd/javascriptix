@@ -19,7 +19,7 @@ window.onload = function () {
     }
     
     function continueOnNextLine() {
-        prompt.textContent = '>';
+        prompt.textContent = '> ';
         stdin.value = '';
     }
 
@@ -39,6 +39,7 @@ window.onload = function () {
         if (text) {
             info = document.createElement("SPAN");
             info.textContent = text;
+            info.classList.add("preformatted");
             line.appendChild(info);
         }
     }

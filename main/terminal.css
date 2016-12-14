@@ -20,6 +20,10 @@ p {
     font-weight: 600;
 }
 
+.preformatted {
+    white-space: pre;
+}
+
 #stdin {
     background-color: black;
     width: 80%;
