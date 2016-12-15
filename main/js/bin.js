@@ -24,41 +24,37 @@
         }
         return files;
     }
-
-    function makeDirectory(args) {
-        var path, dirs, dirname, parent;
-        if (args.length < 2) {
+    
+    function getArgument(args, index) {
+        if (args.length < index + 1) {
             throw new Error('missing operand');
         }
-        path = args[1];
+        return args[index];
+    }
+    
+    function prepareCreation(path, type) {
+        var creation = {}, dirs;
         dirs = j$.fs.parsePath(path);
-        dirname = dirs.pop();
-        if (j$.fs.get(path, true)) {
-            throw new Error("cannot create directory '" + dirname + "'. File exists");
-        }
-        parent = dirs ? j$.fs.get(dirs.join('/')) : j$.context.directory;
+        creation.filename = dirs.pop();
+        creation.parent = dirs ? j$.fs.get(dirs.join('/')) : j$.context.directory;
         if (!parent) {
-            throw new Error("cannot create directory '" + path + "'. No such file or directory");
+            throw new Error("cannot create " + type + " '" + path + "'. No such file or directory");
         }
-        j$.fs.mkdir(dirname, parent, j$.context.user);
+        return creation;
+    }
+
+    function makeDirectory(args) {
+        var creation, path = getArgument(args, 1);
+        if (j$.fs.get(path, true)) {
+            throw new Error("cannot create directory '" + path + "'. File exists");
+        }
+        creation = prepareCreation(path, 'directory');
+        j$.fs.mkdir(creation.filename, creation.parent, j$.context.user);
     }
     
     function touch(args) {
-        var path, dirs, filename, parent;
-        if (args.length < 2) {
-            throw new Error('missing operand');
-        }
-        path = args[1];
-        dirs = j$.fs.parsePath(path);
-        filename = dirs.pop();
-        if (j$.fs.get(path, true)) {
-            throw new Error("cannot create file '" + filename + "'. File exists");
-        }
-        parent = dirs ? j$.fs.get(dirs.join('/')) : j$.context.directory;
-        if (!parent) {
-            throw new Error("cannot create file '" + path + "'. No such file or directory");
-        }
-        j$.fs.touch(filename, parent, j$.context.user);
+        var creation = prepareCreation(getArgument(args, 1), 'file');
+        j$.fs.touch(creation.filename, creation.parent, j$.context.user);
     }
 
     j$.initBins = function () {

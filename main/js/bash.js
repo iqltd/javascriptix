@@ -126,7 +126,12 @@
         }
         
         if (userInput.length > 0) {
-            return runCommand(tokens[0], tokens);
+            try {
+                return runCommand(tokens[0], tokens);
+            } catch (e) {
+                throw new Error(tokens[0] + ": " + e.message);
+            }
+            
         }
     };
 }(window.j$ = window.j$ || {}));

@@ -18,4 +18,16 @@
         }
     });
     
+    t$.testSuites.push({
+        name: "j$.bash.builtins cd",
+        cd_root: function () {
+            j$.bash.builtins.cd(['cd', '/']);
+            assertEquals(j$.fs.root, j$.context.directory);
+        },
+        cd_home: function () {
+            j$.bash.builtins.cd(['cd']);
+            assertEquals(j$.context.user.home + "/", j$.context.directory.path());
+        }
+    });
+    
 }(window.t$ = window.t$ || {}));

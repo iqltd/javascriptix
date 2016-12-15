@@ -25,7 +25,7 @@ window.onload = function () {
 
     function show(text, showPromptText) {
         var line = document.createElement("DIV"),
-            span,
+            span, 
             info;
         results.appendChild(line);
 
@@ -55,8 +55,9 @@ window.onload = function () {
             }
             show(err.message);
             throw err;
+        } finally {
+            resetPrompt();
         }
-        resetPrompt();
     };
 
     function listen(e) {

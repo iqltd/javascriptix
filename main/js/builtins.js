@@ -13,7 +13,11 @@
             }
         }
         if (newDir) {
-            j$.context.directory = newDir;
+            if (newDir.isDirectory) {
+                j$.context.directory = newDir;
+            } else {
+                throw new Error(args[1] + ": Not a directory");
+            }
         }
     }
     

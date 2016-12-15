@@ -18,4 +18,12 @@
         }
     });
     
+    t$.testSuites.push({
+        name: "j$ /usr/bin/whoami",
+        whoami_username: function () {
+            j$.context.user.name = "username";
+            assertEquals('username', j$.fs.get('/usr/bin/whoami').execute());
+        }
+    });
+    
 }(window.t$ = window.t$ || {}));
