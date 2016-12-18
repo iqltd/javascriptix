@@ -1,14 +1,9 @@
 window.onload = function () {
     'use strict';
-
-    var j$Div = document.getElementById("javascriptix"),
-        stdin = document.createElement("TEXTAREA"),
-        results = document.createElement("DIV"),
-        prompt = document.createElement("SPAN"),
-        j$ = window.j$;
     
-    j$.test = {};
-        
+    var j$Div, stdin, results, prompt,
+        j$ = window.j$;
+
     function readUserInput() {
         return stdin.value.trim();
     }
@@ -25,7 +20,7 @@ window.onload = function () {
 
     function show(text, showPromptText) {
         var line = document.createElement("DIV"),
-            span, 
+            span,
             info;
         results.appendChild(line);
 
@@ -44,30 +39,19 @@ window.onload = function () {
         }
     }
     
-    j$.test.processInput = function (userInput) {
-        show(userInput, true);
-        try {
-            show(j$.bash.interpret(userInput));
-        } catch (err) {
-            if (err.statementIncomplete) {
-                continueOnNextLine();
-                return;
-            }
-            show(err.message);
-            throw err;
-        } finally {
-            resetPrompt();
-        }
-    };
-
     function listen(e) {
         if (e.keyCode === 13) {
-            j$.test.processInput(readUserInput());
+            j$.terminal.processInput(readUserInput());
             return false;
         }
     }
     
     function buildUi() {
+        j$Div = document.getElementById("javascriptix");
+        stdin = document.createElement("TEXTAREA");
+        results = document.createElement("DIV");
+        prompt = document.createElement("SPAN");
+            
         stdin.id = "stdin";
         stdin.classList.add("commandText");
         stdin.classList.add("normalText");
@@ -86,6 +70,29 @@ window.onload = function () {
         j$Div.appendChild(prompt);
         j$Div.appendChild(stdin);
     }
+    
+    j$.terminal = {};
+    
+    j$.InputWaitError = function () {
+        this.base = Error;
+        this.statementIncomplete = true;
+    };
+    
+    j$.terminal.processInput = function (userInput) {
+        show(userInput, true);
+        try {
+            show(j$.bash.interpret(userInput));
+        } catch (err) {
+            if (err.statementIncomplete) {
+                continueOnNextLine();
+                return;
+            }
+            show(err.message);
+            throw err;
+        } finally {
+            resetPrompt();
+        }
+    };
     
     j$.init();
     buildUi();

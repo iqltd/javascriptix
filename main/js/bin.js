@@ -38,7 +38,7 @@
         creation.filename = dirs.pop();
         creation.parent = dirs ? j$.fs.get(dirs.join('/')) : j$.context.directory;
         if (!parent) {
-            throw new Error("cannot create " + type + " '" + path + "'. No such file or directory");
+            throw new Error("cannot create " + type + " '" + path + "': No such file or directory");
         }
         return creation;
     }
@@ -46,7 +46,7 @@
     function makeDirectory(args) {
         var creation, path = getArgument(args, 1);
         if (j$.fs.get(path, true)) {
-            throw new Error("cannot create directory '" + path + "'. File exists");
+            throw new Error("cannot create directory '" + path + "': File exists");
         }
         creation = prepareCreation(path, 'directory');
         j$.fs.mkdir(creation.filename, creation.parent, j$.context.user);
