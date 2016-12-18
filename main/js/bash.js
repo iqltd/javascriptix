@@ -85,7 +85,7 @@
     }
         
     function tokenize() {
-        var index = 0, start = 0, charExpected, tokens = [], text = "", filters = [];
+        var index = 0, start = 0, tokens = [], text = "";
         
         function init() {
             index = 0;
@@ -102,13 +102,10 @@
         }
         
         function findPair(char) {
-            var i;
-            charExpected = char;
-            i = text.indexOf(char, start + 1);
+            var i = text.indexOf(char, start + 1);
             if (i > -1) {
+                add(i + 1);
                 index = i;
-                add(index + 1);
-                charExpected = null;
             } else {
                 throw new Error();
             }
