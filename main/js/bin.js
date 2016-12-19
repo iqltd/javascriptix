@@ -57,12 +57,17 @@
         j$.fs.touch(creation.filename, creation.parent, j$.context.user);
     }
 
+    function clear(args) {
+        j$.terminal.init();
+    }
+
     j$.initBins = function () {
         j$.fs.touch('pwd', j$.fs.get('/bin'), j$.users.root, printWorkingDirectory);
         j$.fs.touch('ls', j$.fs.get('/bin'), j$.users.root, listFiles);
         j$.fs.touch('mkdir', j$.fs.get('/bin'), j$.users.root, makeDirectory);
         j$.fs.touch('touch', j$.fs.get('/bin'), j$.users.root, touch);
         j$.fs.touch('whoami', j$.fs.get('/usr/bin'), j$.users.root, whoAmI);
+        j$.fs.touch('clear', j$.fs.get('/usr/bin'), j$.users.root, clear);
     };
     
 }(window.j$ = window.j$ || {}));

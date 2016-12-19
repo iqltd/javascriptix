@@ -9,8 +9,8 @@ window.onload = function () {
     }
 
     function resetPrompt(string) {
-        prompt.textContent = string ? string : j$.context.promptString();
         stdin.value = '';
+        prompt.textContent = string ? string : j$.context.promptString();
     }
 
     function newElement(elementType, classList, textContent, id) {
@@ -43,6 +43,7 @@ window.onload = function () {
     
     function buildUi() {
         j$Div = document.getElementById("javascriptix");
+        j$Div.innerHTML = "";
         stdin = newElement('textarea', ['commandText', 'normalText'], '', 'stdin');
         results = newElement('div', ['commandText', 'normalText'], '', 'results');
         prompt = newElement('span', ['commandText', 'promptText'], '', 'prompt');
@@ -53,6 +54,7 @@ window.onload = function () {
         j$Div.appendChild(results);
         j$Div.appendChild(prompt);
         j$Div.appendChild(stdin);
+        stdin.focus();
     }
     
     j$.terminal = {};
@@ -69,9 +71,12 @@ window.onload = function () {
                 show(err.message);
                 throw err;
             }
+        } finally  {
+            resetPrompt(promptString);
         }
-        resetPrompt(promptString);
     };
+
+    j$.terminal.init = buildUi;
     
     j$.init();
     buildUi();
