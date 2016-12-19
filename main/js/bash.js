@@ -20,6 +20,77 @@
         return contains("\\", character);
     }
     
+    function Filters() {
+        this.filters = [];
+        this.addFilter = function (match, action) {
+            this.filters.push({match: match, action: action});
+        };
+        this.doFilter = function (char) {
+            var i = 0, match = false;
+            while (i < this.filters.length) {
+                match = this.filters[i].match(char);
+                if (match) {
+                    this.filters[i].action(char);
+                }
+                i++;
+            }
+        };
+    }
+
+    function IncompleteInputError() {
+        this.base = Error;
+    }
+        
+    function tokenize() {
+        var index = 0, start = 0, tokens = [], text = "";
+        
+        function init(input) {
+            if (!text) {
+                index = 0;
+                start = 0;
+                tokens = [];
+            }
+            text += input;
+        }
+        
+        function add(i) {
+            if (i > start) {
+                tokens.push(text.substring(start, i));
+                start = i;
+            }
+        }
+        
+        function findPair(char) {
+            var i = start;
+            do {
+                i = text.indexOf(char, i + 1);
+            } while (i > -1 && isEscape(text[i - 1]));
+            if (i > -1) {
+                add(i + 1);
+                index = i;
+            } else {
+                throw new j$.bash.IncompleteInputError();
+            }
+        }
+        
+        return function (input) {
+            var filters = new Filters();
+            filters.addFilter(isWhitespace, function () { add(index); start++; });
+            filters.addFilter(isMeta, function () { add(index); add(index + 1); });
+            filters.addFilter(isQuote, function (char) { add(index); findPair(char); });
+            init(input);
+            
+            while (index < text.length) {
+                filters.doFilter(text[index]);
+                index++;
+            }
+            add(index);
+            text = "";
+            return tokens;
+        };
+    }
+
+
     function stripQuotes(args) {
         var i, arg;
         for (i = 0; i < args.length; i++) {
@@ -30,7 +101,7 @@
             args[i] = arg;
         }
     }
-    
+
     function isPath(command) {
         return command.indexOf('/') > -1;
     }
@@ -65,73 +136,12 @@
             return execute(getFromPATH(command), command, args);
         }
     }
-    
-    function Filters() {
-        this.filters = [];
-        this.exclusive = null;
-        this.addFilter = function (match, action) {
-            this.filters.push({match: match, action: action});
-        };
-        this.doFilter = function (char) {
-            var i = 0, match = false;
-            while (i < this.filters.length) {
-                match = this.filters[i].match(char);
-                if (match) {
-                    this.filters[i].action(char);
-                }
-                i++;
-            }
-        };
-    }
-        
-    function tokenize() {
-        var index = 0, start = 0, tokens = [], text = "";
-        
-        function init() {
-            index = 0;
-            start = 0;
-            text = "";
-            tokens = [];
-        }
-        
-        function add(i) {
-            if (i > start) {
-                tokens.push(text.substring(start, i));
-                start = i;
-            }
-        }
-        
-        function findPair(char) {
-            var i = text.indexOf(char, start + 1);
-            if (i > -1) {
-                add(i + 1);
-                index = i;
-            } else {
-                throw new Error();
-            }
-        }
-        
-        return function (input) {
-            var filters = new Filters(), toreturn;
-            filters.addFilter(isWhitespace, function () { add(index); start++; });
-            filters.addFilter(isMeta, function () { add(index); add(index + 1); });
-            filters.addFilter(isQuote, function (char) { add(index); findPair(char); });
-            text += input;
-            
-            while (index < text.length) {
-                filters.doFilter(text[index]);
-                index++;
-            }
-            add(index);
-            toreturn = tokens;
-            init();
-            return toreturn;
-        };
-    }
         
     j$.bash = j$.bash || {};
         
     j$.bash.tokenize = tokenize();
+
+    j$.bash.IncompleteInputError = IncompleteInputError;
 
     j$.bash.interpret = function (userInput) {
         var tokens = j$.bash.tokenize(userInput);

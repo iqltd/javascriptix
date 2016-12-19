@@ -35,6 +35,10 @@
         tokenize_doubleQuotedDelimitedBySpace: function () {
             var found = ['"double quoted"', '" also double quoted   "'];
             assertEquals(found, j$.bash.tokenize('"double quoted" " also double quoted   "'), arrayEquals);
+        },
+        tokenize_doubleQuotedWithEscapedDoubleQuote: function () {
+            var found = ['"double \\" quoted"'];
+            assertEquals(found, j$.bash.tokenize('"double \\" quoted" '), arrayEquals);
         }
     });
     
