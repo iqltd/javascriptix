@@ -10,7 +10,7 @@ window.onload = function () {
 
     function resetPrompt(string) {
         stdin.value = '';
-        prompt.textContent = string ? string : j$.context.promptString();
+        prompt.textContent = string || j$.context.promptString();
     }
 
     function newElement(elementType, classList, textContent, id) {

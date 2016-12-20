@@ -1,9 +1,6 @@
 (function (j$) {
     'use strict';
     
-    var FileType = Object.freeze({FILE: 'f', DIRECTORY: 'd', BLOCK: 'b', CHARACTER: 'c', LINK: 'l'}),
-        filesystem;
-
     function getRights() {
         var mask = j$.context ? j$.context.umask : '022';
         return parseInt('777', 8) - parseInt(mask, 8);
@@ -30,7 +27,6 @@
     function File(name, parent, user) {
         this.base = FileSystemObject;
         this.base(name, parent, user);
-        this.type = FileType.FILE;
         this.content = '';
         this.append = function (text) {
             this.content += text;
@@ -50,11 +46,13 @@
     function Directory(name, parent, user) {
         this.base = FileSystemObject;
         this.base(name, parent, user);
-        this.type = FileType.DIRECTORY;
         this.content = {};
         this.content['.'] = this;
         this.content['..'] = parent;
         this.isDirectory = true;
+        this.isEmpty = function () {
+            return Object.keys(this.content).length === 2;
+        };
         this.getChild = function (name) {
             return this.content[name];
         };
@@ -71,7 +69,7 @@
 
     function getFs() {
         return {
-            root: new Directory('/', null, j$.auth.root),
+            root: j$.fs.root || new Directory('/', null, j$.auth.root),
 
             mkdir: function (name, parent, user) {
                 var newDir = new Directory(name, parent, user);
@@ -135,26 +133,30 @@
                 return file;
             }
         };
-    };
+    }
+
+    function addDir(parent, names, user) {
+        var i;
+        for (i = 0; i < names.length; i++) {
+            j$.fs.mkdir(names[i], parent, user);
+        }
+    }
+
+    function createFiles() {
+        var rootUser = j$.auth.root;
+        if (j$.fs.root.isEmpty()) {
+            addDir(j$.fs.root, ['bin', 'dev', 'etc', 'home', 'lib', 'mnt', 'opt', 'proc', 'sbin', 'tmp', 'usr', 'var'], rootUser);
+            addDir(j$.fs.get('/usr'), ['bin', 'sbin', 'local'], rootUser);
+            addDir(j$.fs.get('/usr/local'), ['bin'], rootUser);
+        }
+    }
 
     j$.init = j$.init || {};
     j$.init.fs = function () {
-        var rootUser;
-
         j$.init.auth();
+        j$.fs = j$.fs || {};
         j$.fs = getFs();
-
-        rootUser = j$.auth.root;
-
-        function addDir(parent, names, user) {
-            var i;
-            for (i = 0; i < names.length; i++) {
-                j$.fs.mkdir(names[i], parent, user);
-            }
-        };
-        addDir(j$.fs.root, ['bin', 'dev', 'etc', 'home', 'lib', 'mnt', 'opt', 'proc', 'sbin', 'tmp', 'usr', 'var'], rootUser);
-        addDir(j$.fs.get('/usr'), ['bin', 'sbin', 'local'], rootUser);
-        addDir(j$.fs.get('/usr/local'), ['bin'], rootUser);
+        createFiles();
     }
 
 

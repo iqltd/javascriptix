@@ -5,16 +5,16 @@
 
     function Group(name, gid) {
         this.name = name;
-        this.gid = gid ? gid : Group.nextGid++;
+        this.gid = gid || Group.nextGid++;
     }
     Group.nextGid = 100;
 
     function User(name, shell, home, uid, group) {
         this.name = name;
         this.shell = shell;
-        this.home = home ? home : '/home/' + name;
-        this.uid = uid ? uid : User.nextUid++;
-        this.group = group ? group : new Group(this.name);
+        this.home = home || '/home/' + name;
+        this.uid = uid || User.nextUid++;
+        this.group = group || new Group(this.name);
     }
     User.nextUid = 100;
 
