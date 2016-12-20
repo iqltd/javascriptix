@@ -118,6 +118,10 @@
             return newFile;
         },
         
+        rm: function (name, parent, user) {
+            delete parent.content[name];
+        },
+        
         isAbsolute: function (path) {
             return path.charAt(0) === '/';
         },
