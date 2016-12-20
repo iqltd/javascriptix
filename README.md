@@ -1,2 +1,2 @@
 # javascriptix
-A naive bash implementation in Javascript
+A naive bash and gnu tools implementation in Javascript
