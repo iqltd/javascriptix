@@ -5,9 +5,13 @@
     
     t$.testSuites = t$.testSuites || [];
     
-    
     j$ = window.j$;
-    user = j$.users.guest;
+
+    function getUser() {
+        return j$.context.user;
+    }
+
+    user = getUser();
     assertEquals = t$.assertEquals;
     arrayEquals = t$.simpleArrayEquals;
     

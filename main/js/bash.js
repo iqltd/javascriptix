@@ -136,19 +136,27 @@
             return execute(getFromPATH(command), command, args);
         }
     }
-        
-    j$.bash = j$.bash || {};
-        
-    j$.bash.tokenize = tokenize();
 
-    j$.bash.IncompleteInputError = IncompleteInputError;
-
-    j$.bash.interpret = function (userInput) {
+    function interpret (userInput) {
         var tokens = j$.bash.tokenize(userInput);
         stripQuotes(tokens);
-        
+
         if (userInput.length > 0) {
             return runCommand(tokens[0], tokens);
         }
+    }
+
+    j$.init = j$.init || {};
+    j$.init.bash = function () {
+        j$.init.env();
+        j$.init.bin();
+        j$.init.builtins();
+
+        j$.bash.tokenize = tokenize();
+
+        j$.bash.IncompleteInputError = IncompleteInputError;
+
+        j$.bash.interpret = interpret;
     };
+
 }(window.j$ = window.j$ || {}));

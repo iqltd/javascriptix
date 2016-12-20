@@ -77,7 +77,11 @@ window.onload = function () {
     };
 
     j$.terminal.init = buildUi;
+
+    function init() {
+        j$.init.bash();
+    }
     
-    j$.init();
+    init();
     buildUi();
 };

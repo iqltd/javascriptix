@@ -1,8 +1,6 @@
 (function (j$) {
     "use strict";
     
-    j$.bash = j$.bash || {};
-    
     function changeDirectory(args) {
         var newDir;
         if (args) {
@@ -29,9 +27,13 @@
         return message;
     }
 
-    j$.bash.builtins = {
-        cd: changeDirectory,
-        echo: echo
+    j$.init = j$.init || {};
+    j$.init.builtins = function () {
+        j$.bash = j$.bash || {};
+        j$.bash.builtins = {
+            cd: changeDirectory,
+            echo: echo
+        };
     };
     
 }(window.j$ = window.j$ || {}));

@@ -2,6 +2,8 @@
     "use strict";
     
     var results;
+
+    window.j$.init.bash();
     
     function simpleEquals(o1, o2) {
         return o1 === o2;

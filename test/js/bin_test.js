@@ -7,9 +7,7 @@
     
     j$ = window.j$;
     assertEquals = t$.assertEquals;
-    arrayEquals = t$.simpleArrayEquals;
-    j$.init();
-    
+
     t$.testSuites.push({
         name: "j$ /bin/pwd",
         pwd_root: function () {
