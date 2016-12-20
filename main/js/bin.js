@@ -56,6 +56,14 @@
         var creation = prepareCreation(getArgument(args, 1), 'file');
         j$.fs.touch(creation.filename, creation.parent, j$.context.user);
     }
+    
+    function rm(args) {
+        var path = getArgument(args, 1), file = j$.fs.get(getArgument(args, 1), true);
+        if (!file) {
+            throw new Error("cannot remove '" + path + "': No such file or directory");
+        }
+        j$.fs.rm(file.name, file.parent, j$.context.user);
+    }
 
     function clear(args) {
         j$.terminal.init();
@@ -66,6 +74,7 @@
         j$.fs.touch('ls', j$.fs.get('/bin'), j$.users.root, listFiles);
         j$.fs.touch('mkdir', j$.fs.get('/bin'), j$.users.root, makeDirectory);
         j$.fs.touch('touch', j$.fs.get('/bin'), j$.users.root, touch);
+        j$.fs.touch('rm', j$.fs.get('/bin'), j$.users.root, rm);
         j$.fs.touch('whoami', j$.fs.get('/usr/bin'), j$.users.root, whoAmI);
         j$.fs.touch('clear', j$.fs.get('/usr/bin'), j$.users.root, clear);
     };
