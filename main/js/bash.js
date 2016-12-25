@@ -92,14 +92,11 @@
 
 
     function stripQuotes(args) {
-        var i, arg;
-        for (i = 0; i < args.length; i++) {
-            arg = args[i];
-            if (arg && isQuote(arg[0])) {
-                arg = arg.substr(1, arg.length - 2);
+        args.forEach(function (crt, i, array) {
+            if (crt && isQuote(crt[0])) {
+                array[i] = crt.substr(1, crt.length - 2);
             }
-            args[i] = arg;
-        }
+        });
     }
 
     function isPath(command) {
@@ -137,7 +134,7 @@
         }
     }
 
-    function interpret (userInput) {
+    function interpret(userInput) {
         var tokens = j$.bash.tokenize(userInput);
         stripQuotes(tokens);
 

@@ -157,7 +157,7 @@
         j$.fs = j$.fs || {};
         j$.fs = getFs();
         createFiles();
-    }
+    };
 
 
 }(window.j$ = window.j$ || {}));

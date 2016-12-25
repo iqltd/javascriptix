@@ -16,6 +16,11 @@
         } else {
             dir = j$.fs.get(args[1]);
         }
+        dir.list().forEach(function (crt) {
+            if (!crt.startsWith('.')) {
+                files += crt + '\t';
+            }
+        });
         dirFiles = dir.list();
         for (i = 0; i < dirFiles.length; i++) {
             if (dirFiles[i][0] !== '.') {

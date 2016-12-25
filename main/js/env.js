@@ -28,6 +28,6 @@
         j$.init.fs();
 
         j$.context = createContext();
-    }
+    };
 
 }(window.j$ = window.j$ || {}));

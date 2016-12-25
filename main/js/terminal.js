@@ -14,12 +14,12 @@ window.onload = function () {
     }
 
     function newElement(elementType, classList, textContent, id) {
-        var i, element = document.createElement(elementType);
+        var element = document.createElement(elementType);
         element.textContent = textContent;
         element.id = id;
-        for (i = 0; i < classList.length; i++) {
-            element.classList.add(classList[i]);
-        }
+        classList.forEach(function (crt) {
+            element.classList.add(crt);
+        });
         return element;
     }
 
@@ -71,7 +71,7 @@ window.onload = function () {
                 show(err.message);
                 throw err;
             }
-        } finally  {
+        } finally {
             resetPrompt(promptString);
         }
     };
