@@ -10,7 +10,7 @@
     }
     
     function listFiles(args) {
-        var i, files = '', dir, dirFiles;
+        var i, files = '', dir;
         if (args.length < 2) {
             dir = j$.context.directory;
         } else {
@@ -21,12 +21,6 @@
                 files += crt + '\t';
             }
         });
-        dirFiles = dir.list();
-        for (i = 0; i < dirFiles.length; i++) {
-            if (dirFiles[i][0] !== '.') {
-                files += dirFiles[i] + '\t';
-            }
-        }
         return files;
     }
     
@@ -63,7 +57,8 @@
     }
     
     function rm(args) {
-        var path = getArgument(args, 1), file = j$.fs.get(getArgument(args, 1), true);
+        var path = getArgument(args, 1),
+            file = j$.fs.get(path, true);
         if (!file) {
             throw new Error("cannot remove '" + path + "': No such file or directory");
         }
@@ -72,6 +67,22 @@
 
     function clear(args) {
         j$.terminal.init();
+    }
+    
+    function cat(args) {
+        var path = getArgument(args, 1),
+            file = j$.fs.get(path, true);
+        if (!file) {
+            throw new Error(path + ': No such file or directory');
+        }
+        if (file.isDirectory) {
+            throw new Error(path + ': Is a directory');
+        }
+        if (file.content instanceof Function) {
+            throw new Error(path + ': Is a binary file');
+        }
+        return file.content;
+
     }
 
     j$.init = j$.init || {};
@@ -84,6 +95,7 @@
         j$.fs.touch('rm', j$.fs.get('/bin'), j$.auth.root, rm);
         j$.fs.touch('whoami', j$.fs.get('/usr/bin'), j$.auth.root, whoAmI);
         j$.fs.touch('clear', j$.fs.get('/usr/bin'), j$.auth.root, clear);
+        j$.fs.touch('cat', j$.fs.get('/bin'), j$.auth.root, cat);
     };
     
 }(window.j$ = window.j$ || {}));
