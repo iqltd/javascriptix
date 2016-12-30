@@ -5,7 +5,11 @@
 A naive bash and gnu tools implementation in Javascript.
 
 ## Where to play with it?
-The current version is available [here](https://micul01.github.io/javascriptix)
+The current version of the application is available [here](https://micul01.github.io/javascriptix)
+
+If you don't know what to do, start with 
+
+`cat readme`
 
 ## Proof of Concept (December 2016)
 The Proof of Concept version supports basic bash builtins:
