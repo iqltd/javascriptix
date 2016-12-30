@@ -7,7 +7,7 @@ A naive bash and gnu tools implementation in Javascript.
 ## Where to play with it?
 The current version of the application is available [here](https://micul01.github.io/javascriptix)
 
-If you don't know what to do, start with 
+If you don't know what to do first, try 
 
 `cat readme`
 
