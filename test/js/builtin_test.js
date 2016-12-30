@@ -1,12 +1,9 @@
 (function (t$) {
-    "use strict";
-    
-    var j$, assertEquals, arrayEquals;
-    
     t$.testSuites = t$.testSuites || [];
     
-    j$ = window.j$;
-    assertEquals = t$.assertEquals;
+    let j$ = window.j$;
+    let assertEquals = t$.assertEquals;
+    let assertErrorThrown = t$.assertErrorThrown;
 
     t$.testSuites.push({
         name: "j$.bash.builtins echo",
@@ -41,14 +38,8 @@
         cd_file: function () {
             j$.fs.touch("file", j$.fs.get(j$.context.user.home), j$.context.user);
             j$.bash.builtins.cd(['cd']);
-            try {
-                j$.bash.builtins.cd(['cd', 'file']);
-                throw new Error("assertion failed");
-            } catch (e) {
-                
-            }
+            assertErrorThrown(j$.bash.builtins.cd, ['cd', 'file']);
         }
-        
     });
     
 }(window.t$ = window.t$ || {}));

@@ -3,6 +3,10 @@
     font-weight: 500;
 }
 
+.normal {
+    color: black;
+}
+
 .passed {
     color: green;
 }

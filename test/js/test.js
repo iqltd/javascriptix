@@ -1,10 +1,7 @@
-window.onload = function () {
-    "use strict";
-    
-    var testSuites = window.t$.testSuites || [];
 
+window.onload = function () {
     window.t$.init();
-    window.t$.runTestStuites(testSuites);
+    window.t$.runTestSuites(window.t$.testSuites);
 };
 
 

@@ -1,19 +1,11 @@
 (function (t$) {
-    "use strict";
-    
-    var j$, user, assertEquals, arrayEquals;
-    
     t$.testSuites = t$.testSuites || [];
     
-    j$ = window.j$;
+    let j$ = window.j$;
 
-    function getUser() {
-        return j$.context.user;
-    }
-
-    user = getUser();
-    assertEquals = t$.assertEquals;
-    arrayEquals = t$.simpleArrayEquals;
+    let user = () => j$.context.user;
+    let assertEquals = t$.assertEquals;
+    let arrayEquals = t$.arrayEquals;
     
     t$.testSuites.push({
         name: "j$.fs - path method",

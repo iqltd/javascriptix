@@ -1,12 +1,8 @@
 (function (t$) {
-    "use strict";
-    
-    var j$, assertEquals, arrayEquals;
-    
     t$.testSuites = t$.testSuites || [];
     
-    j$ = window.j$;
-    assertEquals = t$.assertEquals;
+    let j$ = window.j$;
+    let assertEquals = t$.assertEquals;
 
     t$.testSuites.push({
         name: "j$ /bin/pwd",

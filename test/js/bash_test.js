@@ -1,14 +1,9 @@
 (function (t$) {
-    "use strict";
-    
-    var j$, assertEquals, arrayEquals;
-    
     t$.testSuites = t$.testSuites || [];
     
-    
-    j$ = window.j$;
-    assertEquals = t$.assertEquals;
-    arrayEquals = t$.simpleArrayEquals;
+    let j$ = window.j$;
+    let assertEquals = t$.assertEquals;
+    let arrayEquals = t$.arrayEquals;
     
     t$.testSuites.push({
         name: "j$.bash.tokenize",
