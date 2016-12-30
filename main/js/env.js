@@ -4,8 +4,11 @@
     var promptSymbol = '$';
 
     function createContext() {
-        var user = j$.auth.addUser('guest', '/bin/bash');
-        j$.fs.mkdir('guest', j$.fs.get('/home'), user);
+        let user = j$.auth.addUser('guest', '/bin/bash');
+        let homeDir = j$.fs.mkdir('guest', j$.fs.get('/home'), user);
+        
+        let message = 'Welcome to javascriptix, the linux-like terminal in your browser! \n\nWhat\'s funny is that, if you are reading this, then you already know what to do.\n\nHave fun! :)';
+        j$.fs.touch('readme', homeDir, user, message);
 
         return {
             user: user,
