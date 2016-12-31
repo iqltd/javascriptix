@@ -1,7 +1,4 @@
 (function (j$) {
-    'use strict';
-
-    var users = {}, auth;
 
     function Group(name, gid) {
         this.name = name;
@@ -18,23 +15,29 @@
     }
     User.nextUid = 100;
 
-    auth = {
-        root: new User('root', '/bin/bash', '/root', '0', new Group('0', 'root')),
-
-        addUser: function (name, shell, home, uid) {
-            var user;
-            if (users[name]) {
-                throw new Error('existing user');
-            }
-            user = new User(name, shell, home, uid);
-            users[name] = user;
-            return user;
+    let root = new User('root', '/bin/bash', '/root', '0', new Group('0', 'root')); 
+    
+    function addUser(name, shell, home, uid) {
+        if (users.has(name)) {
+            throw new Error('existing user');
         }
-    };
-
+        let user = new User(name, shell, home, uid);
+        users.set(name, user);
+        return user;
+    }
+        
+    let users = new Map();
+    
     j$.init = j$.init || {};
     j$.init.auth = function () {
-        j$.auth = auth;
+        j$.auth = {};
+        j$.auth.root = root;
+        j$.auth.addUser = addUser;
+        
+        if (arguments[0] === 'test') {
+            console.warn('j$.auth test initialization was requested.');
+            return { users: users };
+        }
     };
 
 }(window.j$ = window.j$ || {}));

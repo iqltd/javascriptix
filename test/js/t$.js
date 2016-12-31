@@ -3,6 +3,12 @@
     function simpleEquals(o1, o2) {
         return o1 === o2;
     }
+    
+    function assertTrue(condition) {
+        if (!condition) {
+            throw new Error('Assertion failed. Condition not true.');
+        }
+    }
 
     function assertEquals(obj1, obj2, equals = simpleEquals) {
         if (!equals(obj1, obj2)) {
@@ -76,7 +82,7 @@
     
     function addTestDetails(appendTo, err) {
         let fileName = err.fileName ? err.fileName.substr(err.fileName.lastIndexOf('/') + 1) : 'unknown';
-        let details = createElement('P', `${detail} - ${fileName} (line  ${err.lineNumber})`);
+        let details = createElement('P', `${err} - ${fileName} (line  ${err.lineNumber})`);
         details.classList.add('details');
         appendTo.appendChild(details);
     }
@@ -120,6 +126,7 @@
     const report = createReport();
     window.j$.init.bash();
     
+    t$.assertTrue = assertTrue;
     t$.assertEquals = assertEquals;
     t$.arrayEquals = arrayEquals;
     t$.runTestSuites = runTestSuites;
