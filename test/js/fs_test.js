@@ -7,6 +7,10 @@
     let assertEquals = t$.assertEquals;
     let arrayEquals = t$.arrayEquals;
     
+    function getParsePath() {
+        return j$.init.fs('test').parsePath;
+    }
+    
     t$.testSuites.push({
         name: "j$.fs - path method",
         fileAppend: function () {
@@ -67,28 +71,28 @@
         name: "j$.fs.parsePath",
         fsGet_level1_normal: function () {
             var found = ['/', 'level1'];
-            assertEquals(found, j$.fs.parsePath("/level1"), arrayEquals);
+            assertEquals(found, getParsePath()("/level1"), arrayEquals);
         },
         fsGet_level1_slashesAtTheEnd: function () {
             var found = ['/', 'level1'];
-            assertEquals(found, j$.fs.parsePath("/level1////"), arrayEquals);
+            assertEquals(found, getParsePath()("/level1////"), arrayEquals);
         },
         fsGet_level1_moreSlashes: function () {
             var found = ['/', 'level1'];
-            assertEquals(found, j$.fs.parsePath("///level1"), arrayEquals);
+            assertEquals(found, getParsePath()("///level1"), arrayEquals);
         },
         fsGet_root_normal: function () {
             var found = ['/'];
-            assertEquals(found, j$.fs.parsePath("/"), arrayEquals);
+            assertEquals(found, getParsePath()("/"), arrayEquals);
         },
         fsGet_root_moreSlashes: function () {
             var found = ['/'];
-            assertEquals(found, j$.fs.parsePath("//////"), arrayEquals);
+            assertEquals(found, getParsePath()("//////"), arrayEquals);
         },
         fsGet_fileNameWithStrangeCharacters_moreSlashes: function () {
             var fileName = "fileNameWithStrangeCharacters !@#$%^&*()_-+={}[];:\\|'",
                 found = ['/', 'level1', fileName];
-            assertEquals(found, j$.fs.parsePath("////level1//////////////////" + fileName + "//////////////"), arrayEquals);
+            assertEquals(found, getParsePath()("////level1//////////////////" + fileName + "//////////////"), arrayEquals);
         }
     });
     

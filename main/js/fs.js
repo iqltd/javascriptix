@@ -2,8 +2,8 @@
     'use strict';
     
     function getRights() {
-        var mask = j$.context ? j$.context.umask : '022';
-        return parseInt('777', 8) - parseInt(mask, 8);
+        var mask = j$.context ? j$.context.umask : 0o022;
+        return 0o777 - mask;
     }
     
     function FileSystemObject(name, parent, user) {
@@ -66,97 +66,97 @@
             return files;
         };
     }
+    
+    let root = new Directory('/', null, 0);
+    
+    function mkdir (name, parent, user) {
+        let newDir = new Directory(name, parent, user);
+        if (parent) {
+            parent.content[name] = newDir;
+        }
+        return newDir;
+    }
+    
+    function touch (name, parent, user, content) {
+        var newFile = new File(name, parent, user);
+        newFile.content = content;
+        parent.content[name] = newFile;
+        return newFile;
+    }
+    
+    function rm (name, parent, user) {
+        delete parent.content[name];
+    }
+    
+    function parsePath(path) {
+        var index = 0,
+            startingIndex = 0,
+            files = [];
+        path = path.trim();
+        if (path.charAt(0) === '/') {
+            files.push('/');
+        }
 
-    function getFs() {
-        return {
-            root: j$.fs.root || new Directory('/', null, j$.auth.root),
-
-            mkdir: function (name, parent, user) {
-                var newDir = new Directory(name, parent, user);
-                if (parent) {
-                    parent.content[name] = newDir;
-                }
-                return newDir;
-            },
-
-            touch: function (name, parent, user, content) {
-                var newFile = new File(name, parent, user);
-                newFile.content = content;
-                parent.content[name] = newFile;
-                return newFile;
-            },
-
-            rm: function (name, parent, user) {
-                delete parent.content[name];
-            },
-
-            parsePath: function (path) {
-                var index = 0,
-                    startingIndex = 0,
-                    files = [];
-                path = path.trim();
-                if (path.charAt(0) === '/') {
-                    files.push('/');
-                }
-
-                while (index < path.length) {
-                    index = path.indexOf('/', startingIndex);
-                    index = index === -1 ? path.length : index;
-                    if (index - startingIndex > 0) {
-                        files.push(path.substring(startingIndex, index));
-                    }
-                    startingIndex = index + 1;
-                }
-
-                return files;
-            },
-
-            get: function (path, forgiving) {
-                var file, index,
-                    dirs = this.parsePath(path);
-
-                if (dirs && dirs[0] === '/') {
-                    file = this.root;
-                    index = 1;
-                } else {
-                    file = j$.context.directory;
-                    index = 0;
-                }
-
-                while (index < dirs.length && file) {
-                    file = file.getChild(dirs[index]);
-                    index++;
-                }
-                if (!forgiving && !file) {
-                    throw new Error(path + ': No such file or directory');
-                }
-                return file;
+        while (index < path.length) {
+            index = path.indexOf('/', startingIndex);
+            index = index === -1 ? path.length : index;
+            if (index - startingIndex > 0) {
+                files.push(path.substring(startingIndex, index));
             }
-        };
+            startingIndex = index + 1;
+        }
+        return files;
+    }
+    
+    function getCurrentDir() {
+        return j$.context.directory;
+    }
+    
+    function get(path) {
+        var file, index,
+            dirs = parsePath(path);
+
+        if (dirs && dirs[0] === '/') {
+            file = root;
+            index = 1;
+        } else {
+            file = getCurrentDir();
+            index = 0;
+        }
+
+        while (index < dirs.length && file) {
+            file = file.getChild(dirs[index]);
+            index++;
+        }
+        return file;
     }
 
-    function addDir(parent, names, user) {
-        var i;
-        for (i = 0; i < names.length; i++) {
-            j$.fs.mkdir(names[i], parent, user);
-        }
+    function addDir(parent, names) {
+        names.forEach(el => mkdir(el, parent, 0));
     }
 
     function createFiles() {
-        var rootUser = j$.auth.root;
-        if (j$.fs.root.isEmpty()) {
-            addDir(j$.fs.root, ['bin', 'dev', 'etc', 'home', 'lib', 'mnt', 'opt', 'proc', 'sbin', 'tmp', 'usr', 'var'], rootUser);
-            addDir(j$.fs.get('/usr'), ['bin', 'sbin', 'local'], rootUser);
-            addDir(j$.fs.get('/usr/local'), ['bin'], rootUser);
-        }
+        addDir(root, ['bin', 'dev', 'etc', 'home', 'lib', 'mnt', 'opt', 'proc', 'sbin', 'tmp', 'usr', 'var']);
+        addDir(get('/usr'), ['bin', 'sbin', 'local']);
+        addDir(get('/usr/local'), ['bin']);
     }
 
     j$.init = j$.init || {};
+    createFiles();
+    
     j$.init.fs = function () {
         j$.init.auth();
         j$.fs = j$.fs || {};
-        j$.fs = getFs();
-        createFiles();
+        j$.fs.root = root;
+        j$.fs.mkdir = mkdir;
+        j$.fs.touch = touch;
+        j$.fs.rm = rm;
+        j$.fs.get = get;
+        
+        if (arguments[0] === 'test') {
+            console.warn('j$.fs test initialization was requested.');
+            return { parsePath: parsePath };
+        }
     };
 
 
