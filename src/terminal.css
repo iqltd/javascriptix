@@ -1,0 +1,40 @@
+html, body {
+    background-color: black;
+}
+
+p {
+    margin: 0;
+}
+
+.promptText {
+    color: cornflowerblue;
+}
+
+.normalText {
+    color: white;
+}
+
+.commandText {
+    font-family: 'Courier', monospace;
+    font-size: 1em;
+    font-weight: 600;
+}
+
+.preformatted {
+    white-space: pre-wrap;
+}
+
+#stdin {
+    background-color: black;
+    width: 80%;
+    height: 1.1em;
+    padding: 0;
+    
+    border: none;
+    overflow: auto;
+    outline: none;
+    resize: none;
+    box-shadow: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
