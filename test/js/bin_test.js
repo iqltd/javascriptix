@@ -3,20 +3,35 @@
     
     let j$ = window.j$;
     let assertEquals = t$.assertEquals;
+    
+    let fs = {}, auth = {}, context = {};
+    
+    function init() {
+        auth = new j$.__Auth(new Map());
+        fs = new j$.__Fs();
+        context = new j$.__Context('test', auth, fs);
+        window.j$.__initBins(auth, fs, context);
+    }
 
     t$.testSuites.push({
         name: "j$ /bin/pwd",
-        pwd_root: function () {
-            j$.context.directory = j$.fs.root;
-            assertEquals('/', j$.fs.get('/bin/pwd').execute());
+        beforeAll: init,
+        tests: {
+            pwd_root: function () {
+                context.directory = fs.root;
+                assertEquals('/', fs.get('/bin/pwd').execute());
+            }
         }
     });
     
     t$.testSuites.push({
         name: "j$ /usr/bin/whoami",
-        whoami_username: function () {
-            j$.context.user.name = "username";
-            assertEquals('username', j$.fs.get('/usr/bin/whoami').execute());
+        beforeAll: init,
+        tests: {
+            whoami_username: function () {
+                context.user.name = "username";
+                assertEquals('username', fs.get('/usr/bin/whoami').execute());
+            }
         }
     });
     

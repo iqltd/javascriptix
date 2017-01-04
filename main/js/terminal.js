@@ -1,5 +1,4 @@
 window.onload = function () {
-    'use strict';
     
     var j$Div, stdin, results, prompt,
         j$ = window.j$;
@@ -79,7 +78,7 @@ window.onload = function () {
     j$.terminal.init = buildUi;
 
     function init() {
-        j$.init.bash();
+        j$.init();
     }
     
     init();

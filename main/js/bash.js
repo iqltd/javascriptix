@@ -1,5 +1,6 @@
 (function (j$) {
-    'use strict';
+    
+    let fs, context, bash;
     
     function contains(text, char) {
         return text.indexOf(char) > -1 ? char : null;
@@ -41,7 +42,7 @@
         this.base = Error;
     }
         
-    function tokenize() {
+    function getTokenize() {
         var index = 0, start = 0, tokens = [], text = "";
         
         function init(input) {
@@ -89,7 +90,6 @@
             return tokens;
         };
     }
-
 
     function stripQuotes(args) {
         args.forEach(function (crt, i, array) {
@@ -142,18 +142,16 @@
             return runCommand(tokens[0], tokens);
         }
     }
-
-    j$.init = j$.init || {};
-    j$.init.bash = function () {
-        j$.init.env();
-        j$.init.bin();
-        j$.init.builtins();
-
-        j$.bash.tokenize = tokenize();
-
-        j$.bash.IncompleteInputError = IncompleteInputError;
-
-        j$.bash.interpret = interpret;
-    };
+    
+    function Bash(customFs = j$.fs, customContext = j$.context) {
+        [fs, context] = [customFs, customContext];
+        
+        this.tokenize = getTokenize();
+        this.interpret = interpret;
+        this.IncompleteInputError = IncompleteInputError;
+        j$.__initBuiltins(this, fs, context);
+    }
+        
+    j$.__Bash = Bash;
 
 }(window.j$ = window.j$ || {}));

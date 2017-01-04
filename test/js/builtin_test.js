@@ -15,6 +15,7 @@
     
     t$.testSuites.push({
         name: "j$.bash.builtins cd",
+        
         cd_root: function () {
             j$.bash.builtins.cd(['cd', '/']);
             assertEquals(j$.fs.root, j$.context.directory);

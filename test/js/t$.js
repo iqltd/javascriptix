@@ -33,7 +33,8 @@
     
     function assertErrorThrown(func, args) {
         try {
-            func(args);
+            let i = 1;
+            func.apply(null, args);
             throw new Error("assertion failed");
         } catch (e) {}
     }
@@ -87,17 +88,25 @@
         appendTo.appendChild(details);
     }
     
+    function runIfDefined(func = () => {}) {
+        func();
+    }
+    
     function runTests(testSuite, section) {
         let [count, countFailed] = [0, 0];
-        for (let test in testSuite) {
-            if (testSuite[test] instanceof Function) {
+        let tests = testSuite.tests;
+        for (let test in testSuite.tests) {
+            if (tests[test] instanceof Function) {
                 try {
-                    testSuite[test]();
+                    runIfDefined(testSuite.before);
+                    tests[test]();
                     addTestSummary(section, test);
                 } catch (err) {
                     addTestSummary(section, test, false);
                     addTestDetails(section, err);
                     countFailed++;
+                } finally {
+                    runIfDefined(testSuite.after);
                 }
                 count++;
             }
@@ -111,20 +120,21 @@
             let tsTitle = addTestSuiteTitle(report, tsId, testSuite.name);
             let tsSection = addTestSuiteSection(report, tsId);
             
+            runIfDefined(testSuite.beforeAll);
             let [total, failed] = runTests(testSuite, tsSection);
+            runIfDefined(testSuite.afterAll);
             if (!failed) {
                 tsTitle.classList.add('passed');
                 tsTitle.textContent += ` - PASSED (${total} tests)`;
                 tsTitle.click();
             } else {
-                tsTitle.textContent += ` - FAILED (${failed} out of ${total}tests)`;
+                tsTitle.textContent += ` - FAILED (${failed} out of ${total} tests)`;
                 tsTitle.classList.add('failed');
             }
         });
     }
     
     const report = createReport();
-    window.j$.init.bash();
     
     t$.assertTrue = assertTrue;
     t$.assertEquals = assertEquals;

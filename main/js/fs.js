@@ -1,10 +1,4 @@
 (function (j$) {
-    'use strict';
-    
-    function getRights() {
-        var mask = j$.context ? j$.context.umask : 0o022;
-        return 0o777 - mask;
-    }
     
     function FileSystemObject(name, parent, user) {
         this.name = name;
@@ -12,7 +6,6 @@
         this.inode = 0;
         this.user = user;
         this.group = user.group;
-        this.rights = getRights();
         this.isRoot = this.parent === null;
         this.path = function () {
             if (this.isRoot) {
@@ -67,9 +60,7 @@
         };
     }
     
-    let root = new Directory('/', null, 0);
-    
-    function mkdir (name, parent, user) {
+    function mkdir(name, parent, user) {
         let newDir = new Directory(name, parent, user);
         if (parent) {
             parent.content[name] = newDir;
@@ -77,14 +68,14 @@
         return newDir;
     }
     
-    function touch (name, parent, user, content) {
+    function touch(name, parent, user, content) {
         var newFile = new File(name, parent, user);
         newFile.content = content;
         parent.content[name] = newFile;
         return newFile;
     }
     
-    function rm (name, parent, user) {
+    function rm(name, parent, user) {
         delete parent.content[name];
     }
     
@@ -108,11 +99,7 @@
         return files;
     }
     
-    function getCurrentDir() {
-        return j$.context.directory;
-    }
-    
-    function get(path) {
+    function get(path, workingDir, root) {
         var file, index,
             dirs = parsePath(path);
 
@@ -120,7 +107,7 @@
             file = root;
             index = 1;
         } else {
-            file = getCurrentDir();
+            file = workingDir;
             index = 0;
         }
 
@@ -131,33 +118,24 @@
         return file;
     }
 
-    function addDir(parent, names) {
+    function addDirs(parent, names) {
         names.forEach(el => mkdir(el, parent, 0));
     }
-
-    function createFiles() {
-        addDir(root, ['bin', 'dev', 'etc', 'home', 'lib', 'mnt', 'opt', 'proc', 'sbin', 'tmp', 'usr', 'var']);
-        addDir(get('/usr'), ['bin', 'sbin', 'local']);
-        addDir(get('/usr/local'), ['bin']);
-    }
-
-    j$.init = j$.init || {};
-    createFiles();
     
-    j$.init.fs = function () {
-        j$.init.auth();
-        j$.fs = j$.fs || {};
-        j$.fs.root = root;
-        j$.fs.mkdir = mkdir;
-        j$.fs.touch = touch;
-        j$.fs.rm = rm;
-        j$.fs.get = get;
+    function Fs() {
+        let root = new Directory('/', null, 0);
+        this.root = root;
+        this.mkdir = mkdir;
+        this.touch = touch;
+        this.rm = rm;
+        this.get = (path, workingDir) => get(path, workingDir, root);
+        this.parsePath = parsePath;
         
-        if (arguments[0] === 'test') {
-            console.warn('j$.fs test initialization was requested.');
-            return { parsePath: parsePath };
-        }
-    };
-
+        addDirs(root, ['bin', 'dev', 'etc', 'home', 'lib', 'mnt', 'opt', 'proc', 'sbin', 'tmp', 'usr', 'var']);
+        addDirs(this.get('/usr'), ['bin', 'sbin', 'local']);
+        addDirs(this.get('/usr/local'), ['bin']);
+    }
+    
+    j$.__Fs = Fs;
 
 }(window.j$ = window.j$ || {}));

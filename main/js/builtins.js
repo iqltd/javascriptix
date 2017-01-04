@@ -1,18 +1,17 @@
 (function (j$) {
-    "use strict";
     
-    function changeDirectory(args) {
+    function changeDirectory(fs, context, args) {
         var newDir;
         if (args) {
             if (args[1]) {
-                newDir = j$.fs.get(args[1]);
+                newDir = fs.get(args[1], context.directory);
             } else {
-                newDir = j$.fs.get(j$.context.user.home);
+                newDir = fs.get(context.user.home);
             }
         }
         if (newDir) {
             if (newDir.isDirectory) {
-                j$.context.directory = newDir;
+                context.directory = newDir;
             } else {
                 throw new Error(args[1] + ": Not a directory");
             }
@@ -27,11 +26,9 @@
         return message;
     }
 
-    j$.init = j$.init || {};
-    j$.init.builtins = function () {
-        j$.bash = j$.bash || {};
-        j$.bash.builtins = {
-            cd: changeDirectory,
+    j$.__initBuiltins = function (bash, fs, context) {
+        bash.builtins = {
+            cd: changeDirectory.bind(null, fs, context),
             echo: echo
         };
     };
