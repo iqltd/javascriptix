@@ -1,7 +1,6 @@
 (function (j$) {
     
-    let users = new Map(),
-        nextUid = 100,
+    let nextUid = 100,
         nextGid = 100;
 
     function Group(name, gid) {
@@ -9,26 +8,34 @@
         this.gid = gid || nextGid++;
     }
 
-    function User(name, shell, home, uid, group) {
+    function User(name, details = {}) {
         this.name = name;
-        this.shell = shell;
-        this.home = home || '/home/' + name;
-        this.uid = uid || nextUid++;
-        this.group = group || new Group(this.name);
+        this.shell = details.shell;
+        this.home = details.home || '/home/' + name;
+        this.uid = details.uid || nextUid++;
+        this.group = details.group || new Group(this.name);
     }
     
-    function addUser(users, name, shell, home, uid) {
+    function addUser(users, name, details) {
         if (users.has(name)) {
             throw new Error(`User ${name} exists already`);
         }
-        let user = new User(name, shell, home, uid);
+        let user = new User(name, details);
         users.set(name, user);
         return user;
     }
     
-    function Auth(customUsers = users) {
-        this.root = new User('root', '/bin/bash', '/root', '0', new Group('0', 'root')); 
-        this.addUser = addUser.bind(null, customUsers);
+    function removeUser(users, name) {
+        if (!users.delete(name)) {
+            throw new Error(`User ${name} doesn't exist`);
+        }
+    }
+    
+    function Auth() {
+        var users = new Map();
+        this.root = new User('root', { shell: '/bin/bash', home: '/root', uid: '0', group: new Group('0', 'root')}); 
+        this.addUser = addUser.bind(null, users);
+        this.removeUser = removeUser.bind(null, users);
     }
     
     j$.__Auth = Auth;
