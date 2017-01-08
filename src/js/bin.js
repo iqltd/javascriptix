@@ -29,8 +29,7 @@
     }
 
     function clear(sys, args) {
-        let terminal = sys.context;
-        terminal.init();
+        sys.terminal.init();
     }
 
     function listFiles(sys, args) {

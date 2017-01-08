@@ -1,24 +1,22 @@
 (function (j$) {
     
-    let fs, context, bash;
-    
-    function contains(text, char) {
-        return text.indexOf(char) > -1 ? char : null;
-    }
-    
     function isWhitespace(character) {
-        return contains(" \t", character);
+        return " \t".includes(character);
     }
     function isMeta(character) {
-        return contains("\n|&;<>()", character);
+        return "\n|&;<>()".includes(character);
     }
     
     function isQuote(character) {
-        return contains("\"'", character);
+        return "\"'".includes(character);
     }
     
     function isEscape(character) {
-        return contains("\\", character);
+        return "\\".includes(character);
+    }
+    
+    function isPath(command) {
+        return command.includes('/');
     }
     
     function Filters() {
@@ -47,9 +45,7 @@
         
         function init(input) {
             if (!text) {
-                index = 0;
-                start = 0;
-                tokens = [];
+                [index, start, tokens] = [0, 0, []];
             }
             text += input;
         }
@@ -76,9 +72,9 @@
         
         return function (input) {
             var filters = new Filters();
-            filters.addFilter(isWhitespace, function () { add(index); start++; });
-            filters.addFilter(isMeta, function () { add(index); add(index + 1); });
-            filters.addFilter(isQuote, function (char) { add(index); findPair(char); });
+            filters.addFilter(isWhitespace, () => { add(index); start++; });
+            filters.addFilter(isMeta, () => { add(index); add(index + 1); });
+            filters.addFilter(isQuote, char => { add(index); findPair(char); });
             init(input);
             
             while (index < text.length) {
@@ -99,15 +95,11 @@
         });
     }
 
-    function isPath(command) {
-        return command.indexOf('/') > -1;
-    }
-
-    function execute(sys, executable, command, args) {
-        if (executable.content instanceof Function) {
+    function execute(executable, command, args) {
+        if (executable && executable.content instanceof Function) {
             return executable.content(args);
         } else if (executable) {
-            return interpret(sys, executable.content);
+            return this.interpret(executable.content);
         } else {
             throw new Error(command + ': command not found');
         }
@@ -116,7 +108,7 @@
     function getFromPATH(sys, filename) {
         var i = 0, file, dirs = sys.context.env.PATH.split(':');
         while (i < dirs.length && !file) {
-            file = sys.fs.get(dirs[i] + '/' + filename, true);
+            file = sys.fs.get(dirs[i] + '/' + filename);
             i++;
         }
         return file;
@@ -131,11 +123,11 @@
 
         let command = tokens[0];
         if (isPath(command)) {
-            return execute(sys, sys.fs.get(command), command, tokens);
+            return this.execute(sys.fs.get(command), command, tokens);
         } else if (this.builtins.hasOwnProperty(command)) {
             return this.builtins[command](tokens);
         } else {
-            return execute(sys, getFromPATH(sys, command), command, tokens);
+            return this.execute(getFromPATH(sys, command), command, tokens);
         }
     }
     
@@ -144,6 +136,7 @@
         
         this.tokenize = getTokenize();
         this.interpret = interpret.bind(this, system);
+        this.execute = execute.bind(this);
         this.IncompleteInputError = IncompleteInputError;
         j$.__initBuiltins(this, fs, context);
     }

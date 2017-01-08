@@ -75,8 +75,8 @@
     }
     
     j$.__Terminal = function(system) {
-        this.init =  buildUi.bind(null, system);
-        this.processInput = processInput.bind(null, system);
+        this.init =  buildUi.bind(this, system);
+        this.processInput = processInput.bind(this, system);
         this.init();
     };
 

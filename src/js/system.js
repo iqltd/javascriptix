@@ -9,7 +9,7 @@ window.onload = function () {
         system.auth = new j$.__Auth();
         console.log('Pseudo-authorization module loaded.');
 
-        system.fs = new j$.__Fs();
+        system.fs = new j$.__Fs(system);
         console.log('Pseudo-filesystem loaded.');
 
         system.context = new j$.__Context('guest', system);

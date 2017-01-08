@@ -99,15 +99,15 @@
         return files;
     }
     
-    function get(path, workingDir, root) {
+    function get(sys, path) {
         var file, index,
             dirs = parsePath(path);
 
         if (dirs && dirs[0] === '/') {
-            file = root;
+            file = this.root;
             index = 1;
         } else {
-            file = workingDir;
+            file = sys.context.directory;
             index = 0;
         }
 
@@ -122,13 +122,13 @@
         names.forEach(el => mkdir(el, parent, 0));
     }
     
-    function Fs() {
+    function Fs(sys) {
         let root = new Directory('/', null, 0);
         this.root = root;
         this.mkdir = mkdir;
         this.touch = touch;
         this.rm = rm;
-        this.get = (path, workingDir) => get(path, workingDir, root);
+        this.get = get.bind(this, sys);
         this.parsePath = parsePath;
         
         addDirs(root, ['bin', 'dev', 'etc', 'home', 'lib', 'mnt', 'opt', 'proc', 'sbin', 'tmp', 'usr', 'var']);
