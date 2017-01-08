@@ -70,7 +70,7 @@
                 add(i + 1);
                 index = i;
             } else {
-                throw new j$.bash.IncompleteInputError();
+                throw new IncompleteInputError();
             }
         }
         
@@ -103,51 +103,47 @@
         return command.indexOf('/') > -1;
     }
 
-    function isBuiltin(command) {
-        return j$.bash.builtins.hasOwnProperty(command);
-    }
-
-    function execute(executable, command, args) {
-        if (executable) {
-            return executable.execute(args);
+    function execute(sys, executable, command, args) {
+        if (executable.content instanceof Function) {
+            return executable.content(args);
+        } else if (executable) {
+            return interpret(sys, executable.content);
         } else {
             throw new Error(command + ': command not found');
         }
     }
 
-    function getFromPATH(filename) {
-        var i = 0, file, dirs = j$.context.env.PATH.split(':');
+    function getFromPATH(sys, filename) {
+        var i = 0, file, dirs = sys.context.env.PATH.split(':');
         while (i < dirs.length && !file) {
-            file = j$.fs.get(dirs[i] + '/' + filename, true);
+            file = sys.fs.get(dirs[i] + '/' + filename, true);
             i++;
         }
         return file;
     }
 
-    function runCommand(command, args) {
-        if (isPath(command)) {
-            return execute(j$.fs.get(command), command, args);
-        } else if (isBuiltin(command)) {
-            return j$.bash.builtins[command](args);
-        } else {
-            return execute(getFromPATH(command), command, args);
+    function interpret(sys, userInput) {
+        if (!userInput) {
+            return;
         }
-    }
-
-    function interpret(userInput) {
-        var tokens = j$.bash.tokenize(userInput);
+        var tokens = this.tokenize(userInput);
         stripQuotes(tokens);
 
-        if (userInput.length > 0) {
-            return runCommand(tokens[0], tokens);
+        let command = tokens[0];
+        if (isPath(command)) {
+            return execute(sys, sys.fs.get(command), command, tokens);
+        } else if (this.builtins.hasOwnProperty(command)) {
+            return this.builtins[command](tokens);
+        } else {
+            return execute(sys, getFromPATH(sys, command), command, tokens);
         }
     }
     
-    function Bash(customFs = j$.fs, customContext = j$.context) {
-        [fs, context] = [customFs, customContext];
+    function Bash(system) {
+        let [fs, context] = [system.fs, system.context];
         
         this.tokenize = getTokenize();
-        this.interpret = interpret;
+        this.interpret = interpret.bind(this, system);
         this.IncompleteInputError = IncompleteInputError;
         j$.__initBuiltins(this, fs, context);
     }

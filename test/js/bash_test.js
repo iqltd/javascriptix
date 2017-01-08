@@ -8,7 +8,11 @@
     t$.testSuites.push({
         name: "bash.tokenize",
         beforeAll: function() {
-            j$.bash = new j$.__Bash();
+            let sys = {};
+            sys.auth = new j$.__Auth();
+            sys.fs = new j$.__Fs();
+            sys.context = new j$.__Context('test', sys);
+            j$.bash = new j$.__Bash(sys);
         },
         tests: {
             tokenize_delimitedBySpace: function () {

@@ -2,7 +2,8 @@
 
     var promptSymbol = '$';
 
-    function Context(username, auth = j$.auth, fs = j$.fs) {
+    function Context(username, system) {
+        let [sys, fs, auth] = [system, system.fs, system.auth];
         let user = auth.addUser(username, '/bin/bash');
         let homeDir = fs.mkdir(username, fs.get('/home'), user);
         

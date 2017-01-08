@@ -4,13 +4,13 @@
     let j$ = window.j$;
     let assertEquals = t$.assertEquals;
     
-    let fs = {}, auth = {}, context = {};
+    let sys = {};
     
     function init() {
-        auth = new j$.__Auth(new Map());
-        fs = new j$.__Fs();
-        context = new j$.__Context('test', auth, fs);
-        window.j$.__initBins(auth, fs, context);
+        sys.auth = new j$.__Auth();
+        sys.fs = new j$.__Fs();
+        sys.context = new j$.__Context('test', sys);
+        window.j$.__initBins(sys);
     }
 
     t$.testSuites.push({
@@ -18,8 +18,8 @@
         beforeAll: init,
         tests: {
             pwd_root: function () {
-                context.directory = fs.root;
-                assertEquals('/', fs.get('/bin/pwd').execute());
+                sys.context.directory = sys.fs.root;
+                assertEquals('/', sys.fs.get('/bin/pwd').content());
             }
         }
     });
@@ -29,8 +29,8 @@
         beforeAll: init,
         tests: {
             whoami_username: function () {
-                context.user.name = "username";
-                assertEquals('username', fs.get('/usr/bin/whoami').execute());
+                sys.context.user.name = "username";
+                assertEquals('username', sys.fs.get('/usr/bin/whoami').content());
             }
         }
     });

@@ -1,15 +1,14 @@
-window.onload = function () {
+(function (j$) {
     
-    var j$Div, stdin, results, prompt,
-        j$ = window.j$;
+    var j$Div, stdin, results, prompt;
 
     function readUserInput() {
         return stdin.value.trim();
     }
 
-    function resetPrompt(string) {
+    function resetPrompt(context, string) {
         stdin.value = '';
-        prompt.textContent = string || j$.context.promptString();
+        prompt.textContent = string || context.promptString();
     }
 
     function newElement(elementType, classList, textContent, id) {
@@ -33,22 +32,23 @@ window.onload = function () {
         results.appendChild(line);
     }
     
-    function listen(e) {
+    function listen(sys, e) {
         if (e.keyCode === 13) {
-            j$.terminal.processInput(readUserInput());
+            processInput(sys, readUserInput());
             return false;
         }
     }
     
-    function buildUi() {
+    function buildUi(sys) {
+        let context = sys.context;
         j$Div = document.getElementById("javascriptix");
-        j$Div.innerHTML = "";
+        j$Div.innerHTML = '';
         stdin = newElement('textarea', ['commandText', 'normalText'], '', 'stdin');
         results = newElement('div', ['commandText', 'normalText'], '', 'results');
         prompt = newElement('span', ['commandText', 'promptText'], '', 'prompt');
 
-        stdin.addEventListener("keypress", listen);
-        resetPrompt();
+        stdin.addEventListener("keypress", listen.bind(null, sys));
+        resetPrompt(context);
         
         j$Div.appendChild(results);
         j$Div.appendChild(prompt);
@@ -56,31 +56,28 @@ window.onload = function () {
         stdin.focus();
     }
     
-    j$.terminal = {};
-    
-    j$.terminal.processInput = function (userInput) {
-        var promptString;
+    function processInput(sys, userInput) {
+        let [bash, context] = [sys.bash, sys.context];
+        let promptString;
         show(userInput, true);
         try {
-            show(j$.bash.interpret(userInput));
+            show(bash.interpret(userInput));
         } catch (err) {
-            if (err instanceof j$.bash.IncompleteInputError) {
+            if (err instanceof bash.IncompleteInputError) {
                 promptString = '> ';
             } else {
                 show(err.message);
                 throw err;
             }
         } finally {
-            resetPrompt(promptString);
+            resetPrompt(context, promptString);
         }
-    };
-
-    j$.terminal.init = buildUi;
-
-    function init() {
-        j$.init();
     }
     
-    init();
-    buildUi();
-};
+    j$.__Terminal = function(system) {
+        this.init =  buildUi.bind(null, system);
+        this.processInput = processInput.bind(null, system);
+        this.init();
+    };
+
+}(window.j$ = window.j$ || {}));
