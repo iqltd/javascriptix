@@ -105,13 +105,10 @@
         }
     }
 
-    function getFromPATH(sys, filename) {
-        var i = 0, file, dirs = sys.context.env.PATH.split(':');
-        while (i < dirs.length && !file) {
-            file = sys.fs.get(dirs[i] + '/' + filename);
-            i++;
-        }
-        return file;
+    function getFromPATH(fs, path, filename) {
+        let find = p => fs.get(p + '/' + filename);
+        let file = path.split(':').find(e => find(e));
+        return find(file);
     }
 
     function interpret(sys, userInput) {
@@ -127,16 +124,18 @@
         } else if (this.builtins.hasOwnProperty(command)) {
             return this.builtins[command](tokens);
         } else {
-            return this.execute(getFromPATH(sys, command), command, tokens);
+            return this.execute(this.getFromPath(command), command, tokens);
         }
     }
     
     function Bash(system) {
         let [fs, context] = [system.fs, system.context];
+        let path = context.env.PATH;
         
         this.tokenize = getTokenize();
         this.interpret = interpret.bind(this, system);
         this.execute = execute.bind(this);
+        this.getFromPath = getFromPATH.bind(this, fs, path);
         this.IncompleteInputError = IncompleteInputError;
         j$.__initBuiltins(this, fs, context);
     }

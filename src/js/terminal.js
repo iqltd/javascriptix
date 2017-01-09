@@ -57,7 +57,7 @@
     }
     
     function processInput(sys, userInput) {
-        let [bash, context] = [sys.bash, sys.context];
+        let [bash, context] = [j$.bash, sys.context];
         let promptString;
         show(userInput, true);
         try {

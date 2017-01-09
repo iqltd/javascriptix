@@ -4,9 +4,9 @@
     let auth = {};
     
     t$.testSuites.push({
-        name: "auth.addUser",
+        name: "auth - addUser",
         before: function () {
-            auth = new window.j$.__Auth(new Map());
+            auth = new window.j$.__Auth();
         },
         tests: {
             addUser_nonExisting_userAdded: function () {
@@ -18,12 +18,6 @@
                 auth.addUser('existing');    
                 t$.assertErrorThrown(auth.addUser, 'existing');
             }
-        },
-        after: function () {
-            
-        },
-        afterAll: function () {
-            
         }
     });
     

@@ -13,12 +13,15 @@ window.onload = function () {
         console.log('Pseudo-filesystem loaded.');
 
         system.context = new j$.__Context('guest', system);
+        system.getEnv = function(variable) {
+            return system.context.env[variable];
+        };
         console.log('Execution context created.');
 
         j$.__initBins(system);
         console.log('Pseudo-coreutils loaded.');
 
-        system.bash = new j$.__Bash(system);
+        j$.bash = new j$.__Bash(system);
         console.log('Bash loaded.');
         
         system.terminal = new j$.__Terminal(system);

@@ -48,7 +48,7 @@
     
     function createReport() {
         let report = createElement('DIV');
-        let title = createElement('H3', 'Results:');
+        let title = createElement('H3', 'Test campaign results:');
         report.appendChild(title);
         return report;
     }
@@ -134,6 +134,14 @@
         });
     }
     
+    function initSystem() {
+        let sys = {};
+        sys.auth = new j$.__Auth();
+        sys.fs = new j$.__Fs(sys);
+        sys.context = new j$.__Context('test', sys);
+        return sys;
+    }
+    
     const report = createReport();
     
     t$.assertTrue = assertTrue;
@@ -141,6 +149,7 @@
     t$.arrayEquals = arrayEquals;
     t$.runTestSuites = runTestSuites;
     t$.assertErrorThrown = assertErrorThrown;
+    t$.initSystem = initSystem;
     
     t$.init = function () {
         document.body.appendChild(report);
