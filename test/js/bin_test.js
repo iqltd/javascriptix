@@ -14,7 +14,7 @@
     }
 
     t$.testSuites.push({
-        name: "j$ /bin/pwd",
+        name: "/bin/pwd",
         beforeAll: init,
         tests: {
             pwd_root: function () {
@@ -25,12 +25,24 @@
     });
     
     t$.testSuites.push({
-        name: "j$ /usr/bin/whoami",
+        name: "/usr/bin/whoami",
         beforeAll: init,
         tests: {
             whoami_username: function () {
                 sys.context.user.name = "username";
                 assertEquals('username', sys.fs.get('/usr/bin/whoami').content());
+            }
+        }
+    });
+    
+    t$.testSuites.push({
+        name: "/bin/ls",
+        beforeAll: init,
+        tests: {
+            ls: function () {
+                let ls = sys.fs.get('/bin/ls').content;
+                sys.fs.get = x => x === "dir" ? {list: () => ["1"]} : null;
+                assertEquals('1\t', ls(["ls", "dir"]));
             }
         }
     });

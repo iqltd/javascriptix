@@ -3,44 +3,53 @@
     
     let j$ = window.j$;
     let assertEquals = t$.assertEquals;
+    let arrayEquals = t$.arrayEquals;
     let assertErrorThrown = t$.assertErrorThrown;
-
-    t$.testSuites.push({
-        name: "j$.bash.builtins echo",
-        pwd_root: function () {
-            j$.context.directory = j$.fs.root;
-            assertEquals('hello, world! ', j$.bash.builtins.echo(['echo', 'hello, world!']));
-        }
-    });
     
-    t$.testSuites.push({
-        name: "j$.bash.builtins cd",
-        
+    let bash = {};
+    let sys = {};
+    
+    function initBash() {
+        sys = t$.initSystem();
+        bash = new j$.__Bash(sys);
+    }
+    
+    let ts = {name: 'bash builtins - echo', beforeAll: initBash};
+    ts.tests = {
+        echo_whatever: function () {
+            assertEquals('hello, world! ', bash.builtins.echo(['echo', 'hello, world!']));
+        }
+    };
+    t$.testSuites.push(ts);
+
+    ts = {name: 'bash builtins - pwd', beforeAll: initBash};
+    ts.tests = {  
         cd_root: function () {
-            j$.bash.builtins.cd(['cd', '/']);
-            assertEquals(j$.fs.root, j$.context.directory);
+            bash.builtins.cd(['cd', '/']);
+            assertEquals(sys.fs.root, sys.context.directory);
         },
         cd_home: function () {
-            j$.bash.builtins.cd(['cd']);
-            assertEquals(j$.context.user.home + "/", j$.context.directory.path());
+            bash.builtins.cd(['cd']);
+            assertEquals(sys.context.user.home + "/", sys.context.directory.path());
         },
         cd_relative: function () {
-            j$.fs.mkdir("a", j$.fs.get(j$.context.user.home), j$.context.user);
-            j$.bash.builtins.cd(['cd']);
-            j$.bash.builtins.cd(['cd', 'a']);
-            assertEquals(j$.context.user.home + "/a/", j$.context.directory.path());
+            sys.fs.mkdir("a", sys.fs.get(sys.context.user.home), sys.context.user);
+            bash.builtins.cd(['cd']);
+            bash.builtins.cd(['cd', 'a']);
+            assertEquals(sys.context.user.home + "/a/", sys.context.directory.path());
         },
         cd_startWithFullStop: function () {
-            j$.fs.mkdir("a", j$.fs.get(j$.context.user.home), j$.context.user);
-            j$.bash.builtins.cd(['cd']);
-            j$.bash.builtins.cd(['cd', './a']);
-            assertEquals(j$.context.user.home + "/a/", j$.context.directory.path());
+            sys.fs.mkdir("a", sys.fs.get(sys.context.user.home), sys.context.user);
+            bash.builtins.cd(['cd']);
+            bash.builtins.cd(['cd', './a']);
+            assertEquals(sys.context.user.home + "/a/", sys.context.directory.path());
         },
         cd_file: function () {
-            j$.fs.touch("file", j$.fs.get(j$.context.user.home), j$.context.user);
-            j$.bash.builtins.cd(['cd']);
-            assertErrorThrown(j$.bash.builtins.cd, ['cd', 'file']);
+            sys.fs.touch("file", sys.fs.get(sys.context.user.home), sys.context.user);
+            bash.builtins.cd(['cd']);
+            assertErrorThrown(bash.builtins.cd, ['cd', 'file']);
         }
-    });
+    };
+    t$.testSuites.push(ts);
     
 }(window.t$ = window.t$ || {}));

@@ -66,13 +66,13 @@
     };
     t$.testSuites.push(ts);
     
-    ts = {name: 'bash - interpret', before: initBash};
+    ts = {name: 'bash - interpret'};
     ts.before = function () {
         initBash();
         sys.fs.get = x => 'got ' + x;
         bash.execute = x => 'executed ' + x;
         bash.builtins = {builtin: x => 'builtin executed ' + x};
-        bash.getFromPath = x => 'path/' + x;
+        bash.getFromPath = x => 'PATH/' + x;
     };
     ts.tests = {
         interpret_empty: function () {
@@ -85,7 +85,32 @@
             assertEquals('builtin executed builtin', bash.interpret('builtin'));
         },
         interpret_fromPath: function () {
-            assertEquals('executed path/command', bash.interpret('command'));
+            assertEquals('executed PATH/command', bash.interpret('command'));
+        },
+    };
+    t$.testSuites.push(ts);
+    
+    ts = {name: 'bash - getFromPath', before: initBash};
+    ts.tests = {
+        getFromPath_first: function () {
+            sys.fs.get = x => x === '1/file' ? true : false ;
+            sys.context.env.PATH = '1:2:3';
+            assertEquals(true, bash.getFromPath('file'));
+        },
+        getFromPath_inTheMiddle: function () {
+            sys.fs.get = x => x === '2/file' ? true : false ;
+            sys.context.env.PATH = '1:2:3';
+            assertEquals(true, bash.getFromPath('file'));
+        },
+        getFromPath_last: function () {
+            sys.fs.get = x => x === '3/file' ? true : false ;
+            sys.context.env.PATH = '1:2:3';
+            assertEquals(true, bash.getFromPath('file'));
+        },
+        getFromPath_notFound: function () {
+            sys.fs.get = x => x === '4/file' ? true : false ;
+            sys.context.env.PATH = '1:2:3';
+            assertEquals(false, bash.getFromPath('file'));
         },
     };
     t$.testSuites.push(ts);

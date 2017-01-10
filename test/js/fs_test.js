@@ -52,7 +52,7 @@
     });
 
     t$.testSuites.push({
-        name: "fs.get",
+        name: "fs - get",
         beforeAll: function () {
             init();
             fs.mkdir('level1', fs.root, user);
@@ -74,7 +74,7 @@
     });
     
     t$.testSuites.push({
-        name: "fs.parsePath",
+        name: "fs - parsePath",
         beforeAll: function () {
             init();
             fs.touch('fileNameWithStrangeCharacters []', fs.root, user);

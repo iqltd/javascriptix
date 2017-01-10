@@ -105,7 +105,9 @@
         }
     }
 
-    function getFromPATH(fs, path, filename) {
+    function getFromPATH(sys, filename) {
+        let fs = sys.fs;
+        let path = sys.context.env.PATH;
         let find = p => fs.get(p + '/' + filename);
         let file = path.split(':').find(e => find(e));
         return find(file);
@@ -135,7 +137,7 @@
         this.tokenize = getTokenize();
         this.interpret = interpret.bind(this, system);
         this.execute = execute.bind(this);
-        this.getFromPath = getFromPATH.bind(this, fs, path);
+        this.getFromPath = getFromPATH.bind(this, system);
         this.IncompleteInputError = IncompleteInputError;
         j$.__initBuiltins(this, fs, context);
     }
