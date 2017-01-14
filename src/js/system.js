@@ -1,7 +1,9 @@
 window.onload = function () {
-    
+
+    /*eslint no-console: ["error", { allow: ["log", "warn", "error"] }] */
+
     let j$ = window.j$;
-        
+
     try {
         let system = {};
         console.log('Loading components.');
@@ -23,7 +25,7 @@ window.onload = function () {
 
         j$.bash = new j$.__Bash(system);
         console.log('Bash loaded.');
-        
+
         system.terminal = new j$.__Terminal(system);
         console.log('Terminal loaded.');
 
@@ -32,5 +34,5 @@ window.onload = function () {
         console.error('An error occured at the loading of the modules.');
         throw err;
     }
-    
+
 };

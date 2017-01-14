@@ -1,24 +1,28 @@
 (function (j$) {
-    
+
     function isWhitespace(character) {
-        return " \t".includes(character);
+        return ' \t'.includes(character);
     }
     function isMeta(character) {
-        return "\n|&;<>()".includes(character);
+        return '\n|&;<>()'.includes(character);
     }
-    
+
     function isQuote(character) {
-        return "\"'".includes(character);
+        return '\'"'.includes(character);
     }
-    
+
     function isEscape(character) {
-        return "\\".includes(character);
+        return '\\'.includes(character);
     }
-    
+
+    function isComment(character) {
+        return character === '#';
+    }
+
     function isPath(command) {
         return command.includes('/');
     }
-    
+
     function Filters() {
         this.filters = [];
         this.addFilter = function (match, action) {
@@ -39,24 +43,24 @@
     function IncompleteInputError() {
         this.base = Error;
     }
-        
+
     function getTokenize() {
-        var index = 0, start = 0, tokens = [], text = "";
-        
+        var index = 0, start = 0, tokens = [], text = '';
+
         function init(input) {
             if (!text) {
                 [index, start, tokens] = [0, 0, []];
             }
             text += input;
         }
-        
+
         function add(i) {
             if (i > start) {
                 tokens.push(text.substring(start, i));
                 start = i;
             }
         }
-        
+
         function findPair(char) {
             var i = start;
             do {
@@ -69,20 +73,21 @@
                 throw new IncompleteInputError();
             }
         }
-        
+
         return function (input) {
             var filters = new Filters();
+            filters.addFilter(isComment, () => { add(index); findPair('\n'); });
             filters.addFilter(isWhitespace, () => { add(index); start++; });
             filters.addFilter(isMeta, () => { add(index); add(index + 1); });
             filters.addFilter(isQuote, char => { add(index); findPair(char); });
             init(input);
-            
+
             while (index < text.length) {
                 filters.doFilter(text[index]);
                 index++;
             }
             add(index);
-            text = "";
+            text = '';
             return tokens;
         };
     }
@@ -93,6 +98,10 @@
                 array[i] = crt.substr(1, crt.length - 2);
             }
         });
+    }
+
+    function dropComments(args) {
+        return args.filter(e => !isComment(e[0]));
     }
 
     function execute(executable, command, args) {
@@ -118,6 +127,7 @@
             return;
         }
         var tokens = this.tokenize(userInput);
+        tokens = dropComments(tokens);
         stripQuotes(tokens);
 
         let command = tokens[0];
@@ -129,11 +139,10 @@
             return this.execute(this.getFromPath(command), command, tokens);
         }
     }
-    
+
     function Bash(system) {
         let [fs, context] = [system.fs, system.context];
-        let path = context.env.PATH;
-        
+
         this.tokenize = getTokenize();
         this.interpret = interpret.bind(this, system);
         this.execute = execute.bind(this);
@@ -141,7 +150,7 @@
         this.IncompleteInputError = IncompleteInputError;
         j$.__initBuiltins(this, fs, context);
     }
-        
+
     j$.__Bash = Bash;
 
 }(window.j$ = window.j$ || {}));

@@ -41,7 +41,11 @@
         tokenize_doubleQuotedWithEscapedDoubleQuote: function () {
             var found = ['"double \\" quoted"'];
             assertEquals(found, bash.tokenize('"double \\" quoted" '), arrayEquals);
-        }
+        },
+        tokenize_comment: function () {
+            var found = ['#a bb ccc\n'];
+            assertEquals(found, bash.tokenize('#a bb ccc\n'), arrayEquals);
+        },
     };
     t$.testSuites.push(ts);
 
