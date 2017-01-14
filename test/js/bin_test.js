@@ -15,7 +15,7 @@
 
     t$.testSuites.push({
         name: "/bin/pwd",
-        beforeAll: init,
+        before: init,
         tests: {
             pwd_root: function () {
                 sys.context.directory = sys.fs.root;
@@ -26,7 +26,7 @@
     
     t$.testSuites.push({
         name: "/usr/bin/whoami",
-        beforeAll: init,
+        before: init,
         tests: {
             whoami_username: function () {
                 sys.context.user.name = "username";
@@ -37,14 +37,22 @@
     
     t$.testSuites.push({
         name: "/bin/ls",
-        beforeAll: init,
+        before: init,
         tests: {
-            ls: function () {
+            ls_oneFile: function () {
                 let ls = sys.fs.get('/bin/ls').content;
-                sys.fs.get = x => x === "dir" ? {list: () => ["1"]} : null;
-                assertEquals('1\t', ls(["ls", "dir"]));
-            }
+                let path = Symbol();
+                t$.mockFsGet(sys.fs, path, {list: () => ['1']});
+                assertEquals('1\t', ls(['ls', path]));
+            },
+            ls_empty: function () {
+                let ls = sys.fs.get('/bin/ls').content;
+                let path = Symbol();
+                t$.mockFsGet(sys.fs, path, {list: () => []});
+                assertEquals('', ls(['ls', path]));
+            },
         }
     });
+
     
 }(window.t$ = window.t$ || {}));

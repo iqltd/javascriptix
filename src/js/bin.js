@@ -33,8 +33,7 @@
     }
 
     function listFiles(sys, args) {
-        let context = sys.context;
-        let fs = sys.fs;
+        let [fs, context] = [sys.fs, sys.context];
         var i, files = '', dir;
         if (args.length < 2) {
             dir = context.directory;
@@ -50,7 +49,7 @@
     }
 
     function makeDirectory(sys, args) {
-        let fs = sys.fs;
+        let [fs, context] = [sys.fs, sys.context];
         let path = getArgument(args, 1);
         if (fs.get(path, true)) {
             throw new Error("cannot create directory '" + path + "': File exists");
@@ -60,13 +59,13 @@
     }
 
     function touch(sys, args) {
-        let fs = sys.fs;
+        let [fs, context] = [sys.fs, sys.context];
         var creation = prepareCreation(fs, getArgument(args, 1), 'file');
         fs.touch(creation.filename, creation.parent, context.user);
     }
 
     function rm(sys, args) {
-        let fs = sys.fs;
+        let [fs, context] = [sys.fs, sys.context];
         var path = getArgument(args, 1),
             file = fs.get(path, context.directory);
         if (!file) {

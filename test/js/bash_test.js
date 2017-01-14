@@ -93,19 +93,22 @@
     ts = {name: 'bash - getFromPath', before: initBash};
     ts.tests = {
         getFromPath_first: function () {
-            sys.fs.get = x => x === '1/file' ? true : false ;
+            let file = Symbol();
+            t$.mockFsGet(sys.fs, '1/file', file);
             sys.context.env.PATH = '1:2:3';
-            assertEquals(true, bash.getFromPath('file'));
+            assertEquals(file, bash.getFromPath('file'));
         },
         getFromPath_inTheMiddle: function () {
-            sys.fs.get = x => x === '2/file' ? true : false ;
+            let file = Symbol();
+            t$.mockFsGet(sys.fs, '2/file', file);
             sys.context.env.PATH = '1:2:3';
-            assertEquals(true, bash.getFromPath('file'));
+            assertEquals(file, bash.getFromPath('file'));
         },
         getFromPath_last: function () {
-            sys.fs.get = x => x === '3/file' ? true : false ;
+            let file = Symbol();
+            t$.mockFsGet(sys.fs, '3/file', file);
             sys.context.env.PATH = '1:2:3';
-            assertEquals(true, bash.getFromPath('file'));
+            assertEquals(file, bash.getFromPath('file'));
         },
         getFromPath_notFound: function () {
             sys.fs.get = x => x === '4/file' ? true : false ;

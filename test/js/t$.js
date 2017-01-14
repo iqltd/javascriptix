@@ -134,6 +134,11 @@
         });
     }
     
+    function mockFsGet(fs, path, file) {
+        let oldGet = fs.get;
+        fs.get = x => (x === path) ? file : oldGet(x);
+    }
+    
     function initSystem() {
         let sys = {};
         sys.auth = new j$.__Auth();
@@ -150,6 +155,7 @@
     t$.runTestSuites = runTestSuites;
     t$.assertErrorThrown = assertErrorThrown;
     t$.initSystem = initSystem;
+    t$.mockFsGet = mockFsGet;
     
     t$.init = function () {
         document.body.appendChild(report);
