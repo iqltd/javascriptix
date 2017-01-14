@@ -1,5 +1,5 @@
 (function (j$) {
-    
+
     function FileSystemObject(name, parent, user) {
         this.name = name;
         this.parent = parent;
@@ -59,7 +59,7 @@
             return files;
         };
     }
-    
+
     function mkdir(name, parent, user) {
         let newDir = new Directory(name, parent, user);
         if (parent) {
@@ -67,18 +67,18 @@
         }
         return newDir;
     }
-    
+
     function touch(name, parent, user, content) {
         var newFile = new File(name, parent, user);
         newFile.content = content;
         parent.content[name] = newFile;
         return newFile;
     }
-    
-    function rm(name, parent, user) {
+
+    function rm(name, parent) {
         delete parent.content[name];
     }
-    
+
     function parsePath(path) {
         var index = 0,
             startingIndex = 0,
@@ -98,7 +98,7 @@
         }
         return files;
     }
-    
+
     function get(sys, path) {
         var file, index,
             dirs = parsePath(path);
@@ -121,7 +121,7 @@
     function addDirs(parent, names) {
         names.forEach(el => mkdir(el, parent, 0));
     }
-    
+
     function Fs(sys) {
         let root = new Directory('/', null, 0);
         this.root = root;
@@ -130,12 +130,12 @@
         this.rm = rm;
         this.get = get.bind(this, sys);
         this.parsePath = parsePath;
-        
+
         addDirs(root, ['bin', 'dev', 'etc', 'home', 'lib', 'mnt', 'opt', 'proc', 'sbin', 'tmp', 'usr', 'var']);
         addDirs(this.get('/usr'), ['bin', 'sbin', 'local']);
         addDirs(this.get('/usr/local'), ['bin']);
     }
-    
+
     j$.__Fs = Fs;
 
 }(window.j$ = window.j$ || {}));

@@ -1,5 +1,5 @@
 (function (j$) {
-        
+
     function getArgument(args, index) {
         if (args.length < index + 1) {
             throw new Error('missing operand');
@@ -13,7 +13,7 @@
         creation.filename = dirs.pop();
         creation.parent = dirs ? fs.get(dirs.join('/')) : context.directory;
         if (!parent) {
-            throw new Error("cannot create " + type + " '" + path + "': No such file or directory");
+            throw new Error(`cannot create ${type} '${path}': No such file or directory`);
         }
         return creation;
     }
@@ -51,8 +51,8 @@
     function makeDirectory(sys, args) {
         let [fs, context] = [sys.fs, sys.context];
         let path = getArgument(args, 1);
-        if (fs.get(path, true)) {
-            throw new Error("cannot create directory '" + path + "': File exists");
+        if (fs.get(path)) {
+            throw new Error(`cannot create directory '${path}': File exists`);
         }
         let creation = prepareCreation(fs, path, 'directory');
         fs.mkdir(creation.filename, creation.parent, context.user);
@@ -69,7 +69,7 @@
         var path = getArgument(args, 1),
             file = fs.get(path, context.directory);
         if (!file) {
-            throw new Error("cannot remove '" + path + "': No such file or directory");
+            throw new Error(`cannot remove '${path}': No such file or directory`);
         }
         fs.rm(file.name, file.parent, context.user);
     }
@@ -89,11 +89,11 @@
         }
         return file.content;
     }
-    
+
     function initBins(system) {
         let [sys, fs, auth] = [system, system.fs, system.auth];
         let [root, bin, usrBin] = [auth.root, fs.get('/bin'), fs.get('/usr/bin')];
-        
+
         fs.touch('pwd', bin, root, printWorkingDirectory.bind(null, sys));
         fs.touch('ls', bin, root, listFiles.bind(null, sys));
         fs.touch('mkdir', bin, root, makeDirectory.bind(null, sys));
@@ -105,5 +105,5 @@
     }
 
     j$.__initBins = initBins;
-    
+
 }(window.j$ = window.j$ || {}));

@@ -1,20 +1,18 @@
 (function (t$) {
     t$.testSuites = t$.testSuites || [];
-    
+
     let j$ = window.j$;
     let assertEquals = t$.assertEquals;
     let arrayEquals = t$.arrayEquals;
     let assertErrorThrown = t$.assertErrorThrown;
-    
+
     let bash = {};
-    let sys = {};
-    
-    function initBash() {
-        sys = t$.initSystem();
+
+    function initBash(sys) {
         bash = new j$.__Bash(sys);
     }
-    
-    let ts = {name: 'bash - tokenize', beforeAll: initBash};
+
+    let ts = {name: 'bash - tokenize', before: initBash};
     ts.tests = {
         tokenize_delimitedBySpace: function () {
             var found = ['a', 'bb', 'ccc'];
@@ -33,8 +31,8 @@
             assertEquals(found, bash.tokenize('1 \t\n|&;()<>2'), arrayEquals);
         },
         tokenize_singleQuotedDelimitedBySpace: function () {
-            var found = ["'single quoted'", "' also single quoted   '"];
-            assertEquals(found, bash.tokenize("'single quoted' ' also single quoted   '"), arrayEquals);
+            var found = ['\'single quoted\'', '\' also single quoted   \''];
+            assertEquals(found, bash.tokenize('\'single quoted\' \' also single quoted   \''), arrayEquals);
         },
         tokenize_doubleQuotedDelimitedBySpace: function () {
             var found = ['"double quoted"', '" also double quoted   "'];
@@ -46,7 +44,7 @@
         }
     };
     t$.testSuites.push(ts);
-    
+
     ts = {name: 'bash - execute', before: initBash};
     ts.tests = {
         execute_binary: function () {
@@ -59,16 +57,15 @@
             assertEquals('interpreted command', bash.execute(executable, 'command'));
         },
         execute_notFound: function () {
-            let executable = { content: 'command'};
             bash.interpret = x => 'interpreted ' + x;
-            assertErrorThrown(bash.execute, [null]);
+            assertErrorThrown(bash.execute, null);
         },
     };
     t$.testSuites.push(ts);
-    
+
     ts = {name: 'bash - interpret'};
-    ts.before = function () {
-        initBash();
+    ts.before = function (sys) {
+        initBash(sys);
         sys.fs.get = x => 'got ' + x;
         bash.execute = x => 'executed ' + x;
         bash.builtins = {builtin: x => 'builtin executed ' + x};
@@ -89,28 +86,28 @@
         },
     };
     t$.testSuites.push(ts);
-    
+
     ts = {name: 'bash - getFromPath', before: initBash};
     ts.tests = {
-        getFromPath_first: function () {
+        getFromPath_first: function (sys) {
             let file = Symbol();
             t$.mockFsGet(sys.fs, '1/file', file);
             sys.context.env.PATH = '1:2:3';
             assertEquals(file, bash.getFromPath('file'));
         },
-        getFromPath_inTheMiddle: function () {
+        getFromPath_inTheMiddle: function (sys) {
             let file = Symbol();
             t$.mockFsGet(sys.fs, '2/file', file);
             sys.context.env.PATH = '1:2:3';
             assertEquals(file, bash.getFromPath('file'));
         },
-        getFromPath_last: function () {
+        getFromPath_last: function (sys) {
             let file = Symbol();
             t$.mockFsGet(sys.fs, '3/file', file);
             sys.context.env.PATH = '1:2:3';
             assertEquals(file, bash.getFromPath('file'));
         },
-        getFromPath_notFound: function () {
+        getFromPath_notFound: function (sys) {
             sys.fs.get = x => x === '4/file' ? true : false ;
             sys.context.env.PATH = '1:2:3';
             assertEquals(false, bash.getFromPath('file'));
