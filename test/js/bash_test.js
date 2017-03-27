@@ -119,4 +119,13 @@
     };
     t$.testSuites.push(ts);
 
+    ts = {name: 'bash - improvedTokenize', before: initBash};
+    ts.tests = {
+        tokenize_delimitedBySpace: function () {
+            var found = ['a', 'bb', 'ccc'];
+            assertEquals(found, bash.improvedTokenize('a bb ccc'), arrayEquals);
+        },
+    };
+    t$.testSuites.push(ts);
+
 }(window.t$ = window.t$ || {}));

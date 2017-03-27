@@ -92,6 +92,11 @@
         };
     }
 
+    function improvedTokenize(input) {
+        return input.split(/\s/);
+
+    }
+
     function stripQuotes(args) {
         args.forEach(function (crt, i, array) {
             if (crt && isQuote(crt[0])) {
@@ -144,6 +149,7 @@
         let [fs, context] = [system.fs, system.context];
 
         this.tokenize = getTokenize();
+        this.improvedTokenize = improvedTokenize;
         this.interpret = interpret.bind(this, system);
         this.execute = execute.bind(this);
         this.getFromPath = getFromPATH.bind(this, system);
