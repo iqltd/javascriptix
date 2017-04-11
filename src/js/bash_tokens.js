@@ -1,83 +1,116 @@
 
-function either(...fcts) {
-    return (...args) => fcts.some(f => f.apply(null, args));
+class TokenType {
+    constructor(allowedInside) {
+        this.allowedInside = allowedInside;        
+        this.starts = () => false;
+        this.ends = () => true;
+        this.adjustedEnd = i => i;
+    }
+
+    embeddedDetected(text, index) {
+        return this.allowedInside && this.allowedInside.find(token => token.starts(text, index));  
+    }
+
+    afterEmbedded(text, index) {
+        return this.embeddedDetected(text, index).getEnd(text, index + 1);
+    }
+
+    getEnd(text, i) {
+        while (i <= text.length) {
+            if (this.ends(text, i)) {
+                return this.adjustedEnd(i);
+            }
+            if (this.embeddedDetected(text, i)){
+                i = this.afterEmbedded(text, i);
+            }
+            i++;
+        }
+        return -1;
+    }
 }
 
-function allTrue(...fcts) {
-    return (...args) => fcts.every(f => f.apply(null, args));
+class Token {
+    constructor(text, startIndex, endIndex) {
+        this.complete = startIndex < endIndex;
+        this.word = text.slice(startIndex, endIndex);
+        this.rest = text.slice(endIndex);
+    }
 }
 
-function not(f) {
-    return (...args) => !f.apply(null, args);
-}
+let either = (...fcts) => (...args) => fcts.some(f => f.apply(null, args));
+let allTrue = (...fcts) => (...args) => fcts.every(f => f.apply(null, args));
+let not = f => (...args) => !f.apply(null, args);
 
-let Token = function(start, end) {
-    this.start = start;
-    this.end = end;
-    this.startFrom = 0;
-    this.allowed = null;
+let matches = chars => (text, index) => chars.includes(text[index]); 
+let previous = f => (text, index) => f(text, index - 1);
+let inputEnded = (s, i) => s.length < i + 1;
+
+let comment = new TokenType();
+comment.starts = matches('#'); 
+comment.ends = either(matches('\n'), inputEnded);
+
+let singleQuoted = new TokenType();
+let isEscaped = previous(matches('\\'));
+singleQuoted.starts = allTrue(matches('\''), not(isEscaped));
+singleQuoted.ends = matches('\'');
+
+let doubleQuoted = new TokenType();
+doubleQuoted.starts = allTrue(matches('"'), not(isEscaped));
+doubleQuoted.ends = allTrue(matches('"'), not(isEscaped));
+
+let whitespace = new TokenType();
+let isWhitespace = matches(' \t');
+whitespace.starts = isWhitespace;
+whitespace.ends = either(not(isWhitespace), inputEnded);
+whitespace.adjustedEnd = i => i - 1;
+
+let word = new TokenType([singleQuoted, doubleQuoted]);
+word.starts = not(isWhitespace);
+word.ends = either(isWhitespace, inputEnded);
+word.adjustedEnd = i => i - 1;
+
+let findTokenStarting = function (text, i) {
+    return [comment, singleQuoted, doubleQuoted, word, whitespace]
+        .find(token => token.starts(text, i));
 };
 
-let inputEnds = (s, i) => s.length <= i + 1;
-let commentStarts = (s, i) => s[i] === '#';
-let commentEnds = (s, i) => s[i] === '\n';
-let comment = new Token(commentStarts, either(commentEnds, inputEnds));
+let shouldBeSkipped = (token) => [comment, whitespace].includes(token);
 
-let isEscaped = (s, i) => s[i-1] === '\\';
-let isSingleQuote = (s, i) => s[i] === '\'';
-let singleQuoted = new Token(allTrue(isSingleQuote, not(isEscaped)), isSingleQuote);
-singleQuoted.startFrom = 1;
-
-let isDoubleQuote = (s, i) => s[i] === '"';
-let isValidDoubleQuote = allTrue(isDoubleQuote, not(isEscaped));
-let doubleQuoted = new Token(isValidDoubleQuote, isValidDoubleQuote);
-doubleQuoted.startFrom = 1;
-
-let isWhitespace = (s, i) => ' \t'.includes(s[i]);
-let whitespaceEnds = (s, i) => !' \t'.includes(s[i+1]);
-let whitespace = new Token(isWhitespace, either(whitespaceEnds, inputEnds));
-
-let wordEnds = (s, i) => ' \t'.includes(s[i+1]);
-let word = new Token(not(isWhitespace), either(inputEnds, wordEnds));
-word.allowed = [singleQuoted, doubleQuoted];
-
-function tokenize(text) {
-    let allowed = [comment, singleQuoted, doubleQuoted, whitespace, word];
-    let token = allowed.find(token => token.start(text, 0));
-    let end = findEnd(text, token.startFrom, token);
-    return [text.slice(0, end + 1), text.slice(end + 1)] ;
-}
-
-function findEnd(text, i, token) {
-    if (!token) {
-        return i - 1;
-    }
-    while (i < text.length) {
-        if (token.end(text, i)) {
-            return i;
-        }
-        if (token.allowed) {
-            let newToken = token.allowed.find(newToken => newToken.start(text, i));
-            i = findEnd(text, i+1, newToken); 
-        }
-        i++;
+function extractWord(text, start) {
+    if (start >= text.length) {
+        return new Token(text, start, start);
+    }    
+    let token = findTokenStarting(text, start);
+    let end = token.getEnd(text, start + 1) + 1;
+    if (shouldBeSkipped(token)) {
+        return extractWord(text, end);
+    } else {
+        return new Token(text, start, end);    
     }
 }
+
+let tokenize = (text) => extractWord(text, 0);
 
 let cases = [
-    'a b',
-    ' b',
-    'b',
-    'abcde',
-    'abc"d"e',
-    'abcd\'e\'',
-    'abc#nocomment de',
-    'abc #comment',
-    '#comment, so it will be treated like a single word',
-    '"double quoted"'
+    ['a b', 'a'],
+    [' b', 'b'],
+    ['b', 'b'],
+    ['abcde', 'abcde'],
+    ['abc"d"e', 'abc"d"e'],
+    ['abcd\'e\'', 'abcd\'e\''],
+    ['abc#nocomment de', 'abc#nocomment'],
+    ['abc #comment', 'abc'],
+    ['#a b c', ''],
+    ['#a b c\nde', 'de'],
+    ['"double quoted"', '"double quoted"'],
+    ['      echo me', 'echo']
 ];
 
-cases.forEach(tc => { 
-    console.log(tc + ' -> '); 
-    console.log(tokenize(tc)); 
+let failed = cases.filter(tc => {
+    let result = tokenize(tc[0]);
+    return !result || result.word != tc[1]; 
+});
+
+failed.forEach(tc => {
+    console.log(`>${tc[0]}<  -> `, tokenize(tc[0])); 
 });
