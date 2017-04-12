@@ -3,7 +3,6 @@ window.onload = function () {
 
     function createReport(results) {
         let report = createReportSection();
-        report.appendChild(createReportTitle());
         report.appendChild(createReportBody(results));
         return report;
     }
@@ -12,23 +11,14 @@ window.onload = function () {
         return createElement('DIV');
     }
 
-    function createReportTitle() {
-        return createElement('H3', 'Test campaign results:');
-    }
-
     function createReportBody(results) {
         let reportBody = createElement('DIV');
         results.forEach((testSuiteResult, index) => {
-            reportBody.appendChild(createTestSuiteResultSectionTitle(testSuiteResult, testSuiteResultId(index)));
-            reportBody.appendChild(createTestSuiteResultSection(testSuiteResult, testSuiteResultId(index)));
+            let id = testSuiteResultId(index);
+            reportBody.appendChild(createTestSuiteResultSectionTitle(testSuiteResult, id));
+            reportBody.appendChild(createTestSuiteResultSection(testSuiteResult, id));
         });
         return reportBody;
-    }
-
-    function createTestSuiteResultSection(testSuiteResult, id) {
-        let section = createTestSuiteSection(id);
-        section.appendChild(createTestResultsSection(testSuiteResult.testResults));
-        return section;
     }
 
     function testSuiteResultId(index) {
@@ -42,23 +32,25 @@ window.onload = function () {
             tsTitle.classList.add('failed');
         } else {
             tsTitle.classList.add('passed');
-            tsTitle.textContent += ` - PASSED (${testSuiteResult.count} tests)`;
+            tsTitle.textContent += ` (${testSuiteResult.count})`;
             tsTitle.click();
         }        
         return tsTitle;
     }
 
-    function createTestResultsSection(results) {
-        let testResultsSection = createElement('DIV');
-        results.forEach(result => {
-            if (result.failed) {
-                testResultsSection.appendChild(createTestSummary(result.name, false));
-                testResultsSection.appendChild(createTestDetails(result.error));
-            } else {
-                testResultsSection.appendChild(createTestSummary(result.name));
-            }
-        });
-        return testResultsSection; 
+    function createTestSuiteTitle(tsId, text) {
+        let title = createElement('H3', text, tsId + '-header');
+        title.addEventListener('click', () => toggle(tsId));
+        return title;
+    }
+
+    function createElement(type, text, id) {
+        let element = document.createElement(type);
+        if (id) {
+            element.id = id;                        
+        }
+        element.textContent = text;
+        return element;
     }
 
     function toggle(id) {
@@ -68,25 +60,32 @@ window.onload = function () {
         }
     }
 
-    function createElement(type, text, id) {
-        let element = document.createElement(type);
-        element.id = id;
-        element.textContent = text;
-        return element;
+    function createTestSuiteResultSection(testSuiteResult, id) {
+        let section = createTestSuiteSection();
+        section.appendChild(createTestResultsSection(testSuiteResult.testResults, id));
+        return section;
     }
 
-    function createTestSuiteTitle(tsId, text) {
-        let title = createElement('H4', text, tsId + '-header');
-        title.addEventListener('click', () => toggle(tsId));
-        return title;
+    function createTestResultsSection(results, id) {
+        let testResultsSection = createElement('DIV', null, id);
+        results.forEach(result => {
+            if (result.failed) {
+                testResultsSection.appendChild(createTestSummary(result.name, false));
+                testResultsSection.appendChild(createTestDetails(result.error));
+            } else {
+                testResultsSection.appendChild(createTestSummary(result.name));
+                testResultsSection.classList.add('hidden');
+            }
+        });
+        return testResultsSection; 
     }
 
-    function createTestSuiteSection(appendTo, tsId) {
-        return createElement('DIV', null, tsId);
+    function createTestSuiteSection() {
+        return createElement('DIV');
     }
 
     function createTestSummary(test, success = true) {
-        let result = test + (success ? ' - PASSED.' : ' - FAILED!');
+        let result = test + (success ? '' : ' - FAILED!');
         let summary = createElement('P', result);
         summary.classList.add('result');
         summary.classList.add(success ? 'normal' : 'failed');
@@ -102,7 +101,7 @@ window.onload = function () {
 
     let results = window.t$.runTestSuites(window.t$.testSuites);
     const report = createReport(results);
-    document.body.appendChild(report);
+    document.getElementById('results').appendChild(report);
     
 };
 
