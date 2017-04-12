@@ -52,61 +52,40 @@
         }
     }
 
-    function createElement(type, text, id) {
-        let element = document.createElement(type);
-        element.id = id;
-        element.textContent = text;
-        return element;
-    }
 
-    function createReport() {
-        let report = createElement('DIV');
-        let title = createElement('H3', 'Test campaign results:');
-        report.appendChild(title);
-        return report;
-    }
+    function runTestSuites(testSuites) {
+        let testSuiteResults = [];
+        testSuites.forEach(testSuite => {
+            runIfDefined(testSuite.beforeAll);
+            let testResults = runTests(testSuite);
+            runIfDefined(testSuite.afterAll);
 
-    function toggle(id) {
-        let element = document.getElementById(id);
-        if (element) {
-            element.classList.toggle('hidden');
-        }
-    }
-
-    function addTestSuiteTitle(appendTo, tsId, text) {
-        let title = createElement('H4', text, tsId + '-header');
-        title.addEventListener('click', () => toggle(tsId));
-        appendTo.appendChild(title);
-        return title;
-    }
-
-    function addTestSuiteSection(appendTo, tsId) {
-        let section = createElement('DIV', null, tsId);
-        appendTo.appendChild(section);
-        return section;
-    }
-
-    function addTestSummary(appendTo, test, success = true) {
-        let result = test + (success ? ' - PASSED.' : ' - FAILED!');
-        let summary = createElement('P', result);
-        summary.classList.add('result');
-        summary.classList.add(success ? 'normal' : 'failed');
-        appendTo.appendChild(summary);
-    }
-
-    function addTestDetails(appendTo, err) {
-        let fileName = err.fileName ? err.fileName.substr(err.fileName.lastIndexOf('/') + 1) : 'unknown';
-        let details = createElement('P', `${err} - ${fileName} (line  ${err.lineNumber})`);
-        details.classList.add('details');
-        appendTo.appendChild(details);
+            testSuiteResults.push(new TestSuiteResult(testSuite.name, testResults));
+        });
+        return testSuiteResults;
     }
 
     function runIfDefined(func = () => {}, arg = undefined) {
         func(arg);
     }
 
-    function runTests(testSuite, section) {
-        let [count, countFailed] = [0, 0];
+    class TestSuiteResult {
+        constructor(name, testResults = []) {
+            this.name = name;
+            this.testResults = testResults;
+        }
+
+        get count() {
+            return this.testResults.length;
+        }
+
+        get countFailed() {
+            return this.testResults.filter(result => result.failed).length;
+        }
+    }
+
+    function runTests(testSuite) {
+        let testResults = [];        
         let tests = testSuite.tests;
         for (let test in testSuite.tests) {
             if (tests[test] instanceof Function) {
@@ -114,38 +93,26 @@
                     let sys = initSystem();
                     runIfDefined(testSuite.before, sys);
                     tests[test](sys);
-                    addTestSummary(section, test);
+                    testResults.push(new TestResult(test));
                 } catch (err) {
-                    addTestSummary(section, test, false);
-                    addTestDetails(section, err);
-                    countFailed++;
+                    testResults.push(new TestResult(test, err));
                 } finally {
                     runIfDefined(testSuite.after);
                 }
-                count++;
             }
         }
-        return [count, countFailed];
+        return testResults;
     }
 
-    function runTestSuites(testSuites) {
-        testSuites.forEach((testSuite, i) => {
-            let tsId = 'ts' + i;
-            let tsTitle = addTestSuiteTitle(report, tsId, testSuite.name);
-            let tsSection = addTestSuiteSection(report, tsId);
+    class TestResult {
+        constructor(name, error) {
+            this.name = name;
+            this.error = error;
+        }
 
-            runIfDefined(testSuite.beforeAll);
-            let [total, failed] = runTests(testSuite, tsSection);
-            runIfDefined(testSuite.afterAll);
-            if (!failed) {
-                tsTitle.classList.add('passed');
-                tsTitle.textContent += ` - PASSED (${total} tests)`;
-                tsTitle.click();
-            } else {
-                tsTitle.textContent += ` - FAILED (${failed} out of ${total} tests)`;
-                tsTitle.classList.add('failed');
-            }
-        });
+        get failed() {
+            return this.error;
+        }
     }
 
     function mockFsGet(fs, path, file) {
@@ -169,8 +136,6 @@
         return sys;
     }
 
-    const report = createReport();
-
     t$.assertTrue = assertTrue;
     t$.assertDefined = assertDefined;
     t$.assertEquals = assertEquals;
@@ -179,9 +144,5 @@
     t$.assertErrorThrown = assertErrorThrown;
     t$.initSystem = initSystem;
     t$.mockFsGet = mockFsGet;
-
-    t$.init = function () {
-        document.body.appendChild(report);
-    };
 
 }(window.t$ = window.t$ || {}));
