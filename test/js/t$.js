@@ -75,11 +75,11 @@
             this.testResults = testResults;
         }
 
-        get count() {
+        get all() {
             return this.testResults.length;
         }
 
-        get countFailed() {
+        get failed() {
             return this.testResults.filter(result => result.failed).length;
         }
     }

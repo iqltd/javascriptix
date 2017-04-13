@@ -1,8 +1,6 @@
 (function (t$) {
     t$.testSuites = t$.testSuites || [];
 
-    let auth = {};
-
     t$.testSuites.push({
         name: 'auth - addUser',
         tests: {
@@ -13,7 +11,7 @@
 
             addUser_existing_error: function (sys) {
                 sys.auth.addUser('existing');
-                t$.assertErrorThrown(auth.addUser, 'existing');
+                t$.assertErrorThrown(sys.auth.addUser, 'existing');
             }
         }
     });
