@@ -58,7 +58,6 @@ window.onload = function () {
         let tsTitle = createTestSuiteTitle(id, testSuiteResult.name);
         tsTitle.classList.add('passed');
         tsTitle.textContent += ` (${testSuiteResult.all})`;
-        tsTitle.click();
         return tsTitle;
     }
 

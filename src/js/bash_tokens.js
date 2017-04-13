@@ -71,7 +71,7 @@
     word.adjustEnd = i => i - 1;
 
     let findTokenStarting = function (text, i) {
-        return [comment, singleQuoted, doubleQuoted, word, whitespace]
+        return [comment, word, whitespace]
             .find(token => token.starts(text, i));
     };
 
@@ -82,7 +82,7 @@
             return new Token(text, start, start);
         }    
         let token = findTokenStarting(text, start);
-        let end = token.getEnd(text, start + 1) + 1;
+        let end = token.getEnd(text, start) + 1;
         if (shouldBeSkipped(token)) {
             return extractWord(text, end);
         } else {
@@ -93,29 +93,3 @@
     j$.tokenize = (text) => extractWord(text, 0);
 
 }(window.j$ = window.j$ || {}));
-
-let cases = [
-    ['a b', 'a'],
-    [' b', 'b'],
-    ['b', 'b'],
-    ['abcde', 'abcde'],
-    ['abc"d"e', 'abc"d"e'],
-    ['abcd\'e\'', 'abcd\'e\''],
-    ['abc#nocomment de', 'abc#nocomment'],
-    ['abc #comment', 'abc'],
-    ['#a b c', ''],
-    ['#a b c\nde', 'de'],
-    ['"double quoted"', '"double quoted"'],
-    ['      echo me', 'echo']
-];
-
-let j$ = window.j$;
-
-let failed = cases.filter(tc => {
-    let result = j$.tokenize(tc[0]);
-    return !result || result.word != tc[1]; 
-});
-
-failed.forEach(tc => {
-    console.log(`>${tc[0]}<  -> `, j$.tokenize(tc[0])); 
-});

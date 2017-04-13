@@ -20,7 +20,7 @@
 
     function assertEquals(obj1, obj2, equals = simpleEquals) {
         if (!equals(obj1, obj2)) {
-            throw new Error(`Assertion failed. [${obj1}] not equal to [${obj2}]`);
+            throw new Error(`Assertion failed. Expected [${obj1}] not equal to [${obj2}]`);
         }
     }
 
