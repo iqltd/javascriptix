@@ -50,6 +50,12 @@
     comment.starts = matches('#'); 
     comment.ends = either(matches('\n'), inputEnded);
 
+    let whitespace = new TokenType();
+    let isWhitespace = matches(' \t');
+    whitespace.starts = isWhitespace;
+    whitespace.ends = either(not(isWhitespace), inputEnded);
+    whitespace.adjustEnd = i => i - 1;
+
     let singleQuoted = new TokenType();
     let isEscaped = previous(matches('\\'));
     singleQuoted.starts = allTrue(matches('\''), not(isEscaped));
@@ -59,19 +65,13 @@
     doubleQuoted.starts = allTrue(matches('"'), not(isEscaped));
     doubleQuoted.ends = allTrue(matches('"'), not(isEscaped));
 
-    let whitespace = new TokenType();
-    let isWhitespace = matches(' \t');
-    whitespace.starts = isWhitespace;
-    whitespace.ends = either(not(isWhitespace), inputEnded);
-    whitespace.adjustEnd = i => i - 1;
-
     let word = new TokenType([singleQuoted, doubleQuoted]);
     word.starts = not(isWhitespace);
-    word.ends = either(isWhitespace, inputEnded);
+    word.ends = either(inputEnded, allTrue(isWhitespace, not(isEscaped)));
     word.adjustEnd = i => i - 1;
 
     let findTokenStarting = function (text, i) {
-        return [comment, word, whitespace]
+        return [comment, whitespace, word]
             .find(token => token.starts(text, i));
     };
 

@@ -91,6 +91,10 @@
             var found = 'a\'b\'';
             assertEquals(found, tokenize('a\'b\'').word);
         },
+        tokenize_escapedWhitespaceShouldBeTreatedLikeNonWhitespace: function () {
+            var found = 'a\\ b\\\tc';
+            assertEquals(found, tokenize('a\\ b\\\tc').word);
+        },
 
     };
     t$.testSuites.push(ts);

@@ -98,13 +98,14 @@ window.onload = function () {
 
     function createTestResultsSection(results, id) {
         let testResultsSection = createElement('DIV', null, id);
+        testResultsSection.classList.add('hidden');
         results.forEach(result => {
             if (result.failed) {
                 testResultsSection.appendChild(createTestSummary(result.name, false));
                 testResultsSection.appendChild(createTestDetails(result.error));
+                testResultsSection.classList.remove('hidden');
             } else {
                 testResultsSection.appendChild(createTestSummary(result.name));
-                testResultsSection.classList.add('hidden');
             }
         });
         return testResultsSection; 
