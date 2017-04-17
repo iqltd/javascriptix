@@ -3,7 +3,7 @@
     class TokenType {
         constructor(canContain) {
             this.canContain = canContain;        
-            this.starts = () => false;
+            this.starts = () => true;
             this.ends = () => true;
             this.adjustEnd = i => i;
         }
@@ -39,39 +39,43 @@
     }
 
     let either = (...fcts) => (...args) => fcts.some(f => f.apply(null, args));
-    let allTrue = (...fcts) => (...args) => fcts.every(f => f.apply(null, args));
     let not = f => (...args) => !f.apply(null, args);
 
     let matches = chars => (text, index) => chars.includes(text[index]); 
-    let previous = f => (text, index) => f(text, index - 1);
+    let matchesUnescaped = chars => (text, index) => chars.includes(text[index]) && text[index - 1] !== '\\'; 
     let inputEnded = (s, i) => s.length < i + 1;
 
     let comment = new TokenType();
-    comment.starts = matches('#'); 
+    comment.starts = matchesUnescaped('#'); 
     comment.ends = either(matches('\n'), inputEnded);
+    comment.adjustEnd = i => i - 1;
+
+    let metacharacter = new TokenType();
+    let isMetacharacter = matchesUnescaped('\n|&;()<>');
+    metacharacter.starts = isMetacharacter; 
+    metacharacter.ends = () => true;
 
     let whitespace = new TokenType();
-    let isWhitespace = matches(' \t');
+    let isWhitespace = matchesUnescaped(' \t');
     whitespace.starts = isWhitespace;
     whitespace.ends = either(not(isWhitespace), inputEnded);
     whitespace.adjustEnd = i => i - 1;
 
     let singleQuoted = new TokenType();
-    let isEscaped = previous(matches('\\'));
-    singleQuoted.starts = allTrue(matches('\''), not(isEscaped));
+    singleQuoted.starts = matchesUnescaped('\'');
     singleQuoted.ends = matches('\'');
 
     let doubleQuoted = new TokenType();
-    doubleQuoted.starts = allTrue(matches('"'), not(isEscaped));
-    doubleQuoted.ends = allTrue(matches('"'), not(isEscaped));
+    doubleQuoted.starts = matchesUnescaped('"');
+    doubleQuoted.ends = matchesUnescaped('"');
 
     let word = new TokenType([singleQuoted, doubleQuoted]);
-    word.starts = not(isWhitespace);
-    word.ends = either(inputEnded, allTrue(isWhitespace, not(isEscaped)));
+    word.starts = () => true;
+    word.ends = either(inputEnded, isWhitespace, isMetacharacter);
     word.adjustEnd = i => i - 1;
 
     let findTokenStarting = function (text, i) {
-        return [comment, whitespace, word]
+        return [comment, whitespace, metacharacter, word]
             .find(token => token.starts(text, i));
     };
 
