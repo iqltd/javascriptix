@@ -3,8 +3,10 @@
 
     let j$ = window.j$;
     let assertEquals = t$.assertEquals;
+    let sys = t$.initSystem();
+    let bash = new j$.__Bash(sys);
 
-    let tokenize = text => j$.tokenize(text).word;
+    let tokenize = text => bash.tokenize(text).word;
 
     let ts = {name: 'tokenize'};
     ts.tests = {
@@ -100,6 +102,9 @@
         tokenize_escapedMetaIsNoMeta: function () {
             assertEquals('a\\(b\\)', tokenize('a\\(b\\)'));
         },
+        // tokenize_incompleteQuoting: function () {
+        //     assertEquals('', tokenize('a"incomplete'));
+        // },
 
     };
     t$.testSuites.push(ts);

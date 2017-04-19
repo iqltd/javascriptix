@@ -1,100 +1,11 @@
 (function (j$) {
 
-    function isWhitespace(character) {
-        return ' \t'.includes(character);
-    }
-    function isMeta(character) {
-        return '\n|&;<>()'.includes(character);
-    }
-
     function isQuote(character) {
         return '\'"'.includes(character);
     }
 
-    function isEscape(character) {
-        return '\\'.includes(character);
-    }
-
-    function isComment(character) {
-        return character === '#';
-    }
-
     function isPath(command) {
         return command.includes('/');
-    }
-
-    function Filters() {
-        this.filters = [];
-        this.addFilter = function (match, action) {
-            this.filters.push({match: match, action: action});
-        };
-        this.doFilter = function (char) {
-            var i = 0, match = false;
-            while (i < this.filters.length) {
-                match = this.filters[i].match(char);
-                if (match) {
-                    this.filters[i].action(char);
-                }
-                i++;
-            }
-        };
-    }
-
-    function IncompleteInputError() {
-        this.base = Error;
-    }
-
-    function getTokenize() {
-        var index = 0, start = 0, tokens = [], text = '';
-
-        function init(input) {
-            if (!text) {
-                [index, start, tokens] = [0, 0, []];
-            }
-            text += input;
-        }
-
-        function add(i) {
-            if (i > start) {
-                tokens.push(text.substring(start, i));
-                start = i;
-            }
-        }
-
-        function findPair(char) {
-            var i = start;
-            do {
-                i = text.indexOf(char, i + 1);
-            } while (i > -1 && isEscape(text[i - 1]));
-            if (i > -1) {
-                add(i + 1);
-                index = i;
-            } else {
-                throw new IncompleteInputError();
-            }
-        }
-
-        return function (input) {
-            var filters = new Filters();
-            filters.addFilter(isComment, () => { add(index); findPair('\n'); });
-            filters.addFilter(isWhitespace, () => { add(index); start++; });
-            filters.addFilter(isMeta, () => { add(index); add(index + 1); });
-            filters.addFilter(isQuote, char => { add(index); findPair(char); });
-            init(input);
-
-            while (index < text.length) {
-                filters.doFilter(text[index]);
-                index++;
-            }
-            add(index);
-            text = '';
-            return tokens;
-        };
-    }
-
-    function improvedTokenize(input) {
-        return input.split(/\s/);
-
     }
 
     function stripQuotes(args) {
@@ -103,10 +14,6 @@
                 array[i] = crt.substr(1, crt.length - 2);
             }
         });
-    }
-
-    function dropComments(args) {
-        return args.filter(e => !isComment(e[0]));
     }
 
     function execute(executable, command, args) {
@@ -127,12 +34,22 @@
         return find(file);
     }
 
+    function tokenizeAll(input, tokenize) {
+        let tokens = [];
+        let toTokenize = input;
+        while (toTokenize) {
+            let result = tokenize(toTokenize);
+            tokens.push(result.word);
+            toTokenize = result.rest;
+        }
+        return tokens;
+    }
+
     function interpret(sys, userInput) {
         if (!userInput) {
             return;
         }
-        var tokens = this.tokenize(userInput);
-        tokens = dropComments(tokens);
+        var tokens = tokenizeAll(userInput, this.tokenize);
         stripQuotes(tokens);
 
         let command = tokens[0];
@@ -148,13 +65,11 @@
     function Bash(system) {
         let [fs, context] = [system.fs, system.context];
 
-        this.tokenize = getTokenize();
-        this.improvedTokenize = improvedTokenize;
         this.interpret = interpret.bind(this, system);
         this.execute = execute.bind(this);
         this.getFromPath = getFromPATH.bind(this, system);
-        this.IncompleteInputError = IncompleteInputError;
         j$.__initBuiltins(this, fs, context);
+        j$.__initTokenize(this);
     }
 
     j$.__Bash = Bash;

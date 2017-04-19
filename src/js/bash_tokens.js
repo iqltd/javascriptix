@@ -26,7 +26,7 @@
                 }
                 index++;
             }
-            return -1;
+            throw 'incomplete';
         }
     }
 
@@ -94,6 +94,8 @@
         }
     }
 
-    j$.tokenize = (text) => extractWord(text, 0);
+    j$.__initTokenize = function (bash) {
+        bash.tokenize = (text) => extractWord(text, 0);
+    };
 
 }(window.j$ = window.j$ || {}));

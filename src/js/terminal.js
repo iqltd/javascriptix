@@ -63,7 +63,7 @@
         try {
             show(bash.interpret(userInput + '\n'));
         } catch (err) {
-            if (err instanceof bash.IncompleteInputError) {
+            if (err == 'incomplete') {
                 promptString = '> ';
             } else {
                 show(err.message);
