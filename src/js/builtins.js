@@ -13,7 +13,7 @@
             if (newDir.isDirectory) {
                 context.directory = newDir;
             } else {
-                throw new Error(args[1] + ": Not a directory");
+                throw new Error(args[1] + ': Not a directory');
             }
         }
     }

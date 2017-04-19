@@ -57,21 +57,18 @@
     }
 
     function processInput(sys, userInput) {
-        let [bash, context] = [j$.bash, sys.context];
+        let [bash, context, fs] = [j$.bash, sys.context, sys.fs];
         let promptString;
         show(userInput, true);
-        try {
-            show(bash.interpret(userInput + '\n'));
-        } catch (err) {
-            if (err == 'incomplete') {
-                promptString = '> ';
-            } else {
-                show(err.message);
-                throw err;
-            }
-        } finally {
-            resetPrompt(context, promptString);
+        let [input, output, error]  = [fs.getFile(0), fs.getFile(1), fs.getFile(2)];
+        input.append(userInput);
+        if (bash.interpret()) {
+            promptString = '> ';
+        } else {
+            show(error.readline());
+            show(output.readline());
         }
+        resetPrompt(context, promptString);
     }
 
     j$.__Terminal = function(system) {

@@ -29,30 +29,6 @@
     };
     t$.testSuites.push(ts);
 
-    ts = {name: 'bash - interpret'};
-    ts.before = function (sys) {
-        initBash(sys);
-        sys.fs.get = x => 'got ' + x;
-        bash.execute = x => 'executed ' + x;
-        bash.builtins = {builtin: x => 'builtin executed ' + x};
-        bash.getFromPath = x => 'PATH/' + x;
-    };
-    ts.tests = {
-        interpret_empty: function () {
-            assertEquals(undefined, bash.interpret(''));
-        },
-        interpret_isPath: function () {
-            assertEquals('executed got ./path', bash.interpret('./path'));
-        },
-        interpret_builtin: function () {
-            assertEquals('builtin executed builtin', bash.interpret('builtin'));
-        },
-        interpret_fromPath: function () {
-            assertEquals('executed PATH/command', bash.interpret('command'));
-        },
-    };
-    t$.testSuites.push(ts);
-
     ts = {name: 'bash - getFromPath', before: initBash};
     ts.tests = {
         getFromPath_first: function (sys) {

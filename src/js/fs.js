@@ -1,55 +1,87 @@
 (function (j$) {
 
-    function FileSystemObject(name, parent, user) {
-        this.name = name;
-        this.parent = parent;
-        this.inode = 0;
-        this.user = user;
-        this.group = user.group;
-        this.isRoot = this.parent === null;
-        this.path = function () {
+    class FileSystemObject {
+        constructor (name, parent, user) {
+            this.name = name;
+            this.parent = parent;
+            this.inode = 0;
+            this.user = user;
+            this.group = user.group;
+            this.isRoot = this.parent === null;    
+        }
+
+        get path() {
             if (this.isRoot) {
                 return '/';
             }
             var ending = (this.isDirectory) ? '/' : '';
 
-            return this.parent.path() + this.name + ending;
-        };
+            return this.parent.path + this.name + ending;
+        }
     }
 
-    function File(name, parent, user) {
-        this.base = FileSystemObject;
-        this.base(name, parent, user);
-        this.content = '';
-        this.append = function (text) {
+    class File extends FileSystemObject {
+        constructor (name, parent, user) {
+            super(name, parent, user);
+            this.content = '';
+            this.readPointer = 0;
+        }
+
+        append(text) {
             this.content += text;
-        };
-        this.overwrite = function (text) {
+        } 
+
+        write(text) {
             this.content = text;
-        };
-        this.execute = function (args) {
+        }
+
+        isEmpty() {
+            return !this.content.length;
+        }
+
+        readline() {
+            let old = this.readPointer;
+            this.readPointer = this.content.includes('\n') ? this.content.indexOf('\n')
+                : this.content.length;
+            return this.content.slice(old, this.readPointer);
+        }
+
+        rewind() {
+            this.readPointer = 0;
+        }
+
+        consume() {
+            this.content = this.content.slice(this.readPointer);
+            this.readPointer = 0;
+        }
+
+        execute(args) {
             if (this.content instanceof Function) {
                 return this.content(args);
             } else {
                 j$.bash(this.content);
             }
-        };
+        }
     }
 
-    function Directory(name, parent, user) {
-        this.base = FileSystemObject;
-        this.base(name, parent, user);
-        this.content = {};
-        this.content['.'] = this;
-        this.content['..'] = parent;
-        this.isDirectory = true;
-        this.isEmpty = function () {
-            return Object.keys(this.content).length === 2;
-        };
-        this.getChild = function (name) {
-            return this.content[name];
-        };
-        this.list = function () {
+    class Directory extends FileSystemObject {
+        constructor (name, parent, user) {
+            super(name, parent, user);
+            this.content = new Map();
+            this.content.set('.', this);
+            this.content.set('..', parent);
+            this.isDirectory = true;
+        }
+
+        isEmpty() {
+            return this.content.entries.length === 2;
+        }
+
+        getChild(name) {
+            return this.content.get(name);
+        }
+
+        list() {
             var file, files = [];
             for (file in this.content) {
                 if (this.content.hasOwnProperty(file)) {
@@ -57,26 +89,26 @@
                 }
             }
             return files;
-        };
+        }
     }
 
     function mkdir(name, parent, user) {
         let newDir = new Directory(name, parent, user);
         if (parent) {
-            parent.content[name] = newDir;
+            parent.content.set(name, newDir);
         }
         return newDir;
     }
 
-    function touch(name, parent, user, content) {
+    function touch(name, parent, user, content = '') {
         var newFile = new File(name, parent, user);
         newFile.content = content;
-        parent.content[name] = newFile;
+        parent.content.set(name, newFile);
         return newFile;
     }
 
     function rm(name, parent) {
-        delete parent.content[name];
+        parent.content.delete(name);
     }
 
     function parsePath(path) {
@@ -122,6 +154,21 @@
         names.forEach(el => mkdir(el, parent, 0));
     }
 
+    function addFiles(parent, names) {
+        names.forEach(el => touch(el, parent, 0));
+    }
+
+    function getFile(descriptor) {
+        switch (descriptor) {
+        case 0:
+            return this.get('/dev/stdin');
+        case 1:
+            return this.get('/dev/stdout');
+        case 2:
+            return this.get('/dev/stderr');
+        }
+    }
+
     function Fs(sys) {
         let root = new Directory('/', null, 0);
         this.root = root;
@@ -129,11 +176,13 @@
         this.touch = touch;
         this.rm = rm;
         this.get = get.bind(this, sys);
+        this.getFile = getFile.bind(this);
         this.parsePath = parsePath;
 
         addDirs(root, ['bin', 'dev', 'etc', 'home', 'lib', 'mnt', 'opt', 'proc', 'sbin', 'tmp', 'usr', 'var']);
         addDirs(this.get('/usr'), ['bin', 'sbin', 'local']);
         addDirs(this.get('/usr/local'), ['bin']);
+        addFiles(this.get('/dev'), ['stdin', 'stdout', 'stderr']);
     }
 
     j$.__Fs = Fs;

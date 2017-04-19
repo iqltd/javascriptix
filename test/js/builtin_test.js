@@ -29,19 +29,19 @@
         },
         cd_home: function () {
             bash.builtins.cd(['cd']);
-            assertEquals(sys.context.user.home + '/', sys.context.directory.path());
+            assertEquals(sys.context.user.home + '/', sys.context.directory.path);
         },
         cd_relative: function () {
             sys.fs.mkdir('a', sys.fs.get(sys.context.user.home), sys.context.user);
             bash.builtins.cd(['cd']);
             bash.builtins.cd(['cd', 'a']);
-            assertEquals(sys.context.user.home + '/a/', sys.context.directory.path());
+            assertEquals(sys.context.user.home + '/a/', sys.context.directory.path);
         },
         cd_startWithFullStop: function () {
             sys.fs.mkdir('a', sys.fs.get(sys.context.user.home), sys.context.user);
             bash.builtins.cd(['cd']);
             bash.builtins.cd(['cd', './a']);
-            assertEquals(sys.context.user.home + '/a/', sys.context.directory.path());
+            assertEquals(sys.context.user.home + '/a/', sys.context.directory.path);
         },
         cd_file: function () {
             sys.fs.touch('file', sys.fs.get(sys.context.user.home), sys.context.user);

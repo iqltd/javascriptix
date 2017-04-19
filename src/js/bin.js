@@ -18,23 +18,23 @@
         return creation;
     }
 
-    function printWorkingDirectory(sys, args) {
+    function printWorkingDirectory(sys) {
         let context = sys.context;
-        return context.directory.path();
+        return context.directory.path;
     }
 
-    function whoAmI(sys, args) {
+    function whoAmI(sys) {
         let context = sys.context;
         return context.user.name;
     }
 
-    function clear(sys, args) {
+    function clear(sys) {
         sys.terminal.init();
     }
 
     function listFiles(sys, args) {
         let [fs, context] = [sys.fs, sys.context];
-        var i, files = '', dir;
+        var files = '', dir;
         if (args.length < 2) {
             dir = context.directory;
         } else {

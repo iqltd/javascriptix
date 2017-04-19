@@ -45,20 +45,38 @@
         return tokens;
     }
 
-    function interpret(sys, userInput) {
+    function interpret(sys) {
+        let fs = sys.fs;
+        let [input, output, error]  = [fs.getFile(0), fs.getFile(1), fs.getFile(2)];
+        let userInput = input.readline();
         if (!userInput) {
-            return;
+            return 0;
         }
-        var tokens = tokenizeAll(userInput, this.tokenize);
+
+        var tokens;
+        try {
+            tokens = tokenizeAll(userInput, this.tokenize);
+            input.consume();
+        } catch (error) {
+            input.rewind();
+            return 1;
+        }
         stripQuotes(tokens);
 
         let command = tokens[0];
-        if (isPath(command)) {
-            return this.execute(sys.fs.get(command), command, tokens);
-        } else if (this.builtins.hasOwnProperty(command)) {
-            return this.builtins[command](tokens);
-        } else {
-            return this.execute(this.getFromPath(command), command, tokens);
+        let out = '';
+        try {
+            if (isPath(command)) {
+                out = this.execute(sys.fs.get(command), command, tokens);
+            } else if (this.builtins.hasOwnProperty(command)) {
+                out = this.builtins[command](tokens);
+            } else {
+                out = this.execute(this.getFromPath(command), command, tokens);
+            }
+            output.append(out);
+        } catch (err) {
+            error.append(err.message);
+            throw err;
         }
     }
 

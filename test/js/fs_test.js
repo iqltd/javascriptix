@@ -21,31 +21,31 @@
                 file.append('appended');
                 assertEquals('prefixappended', file.content);
             },
-            fileOverwrite: function () {
+            fileWrite: function () {
                 var file = fs.touch('test', fs.root, user);
                 file.content = 'oldtext';
-                file.overwrite('newtext');
+                file.write('newtext');
                 assertEquals('newtext', file.content);
             },
             filePath_level1: function () {
                 var file = fs.touch('name', fs.root, user);
-                assertEquals('/name', file.path());
+                assertEquals('/name', file.path);
             },
             filePath_level2: function () {
                 var file = fs.touch('name', fs.mkdir('parent', fs.root, user), user);
-                assertEquals('/parent/name', file.path());
+                assertEquals('/parent/name', file.path);
             },
             dirPath_root: function () {
                 var file = fs.mkdir('', null, user);
-                assertEquals('/', file.path());
+                assertEquals('/', file.path);
             },
             dirPath_level1: function () {
                 var file = fs.mkdir('name', fs.root, user);
-                assertEquals('/name/', file.path());
+                assertEquals('/name/', file.path);
             },
             dirPath_level2: function () {
                 var file = fs.mkdir('name', fs.mkdir('parent', fs.root, user), user);
-                assertEquals('/parent/name/', file.path());
+                assertEquals('/parent/name/', file.path);
             }
         }
 
