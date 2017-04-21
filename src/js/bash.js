@@ -45,10 +45,24 @@
         return tokens;
     }
 
+    function readInput(sys) {
+        return sys.fs.getFile(0).readline();
+    }
+
+    function writeOutput(sys, text) {
+        if (text) {
+            sys.fs.getFile(1).append(text);
+        }
+    }
+
+    function writeErr(sys, text) {
+        if (text) {
+            sys.fs.getFile(2).append(text);
+        }
+    }
+
     function interpret(sys) {
-        let fs = sys.fs;
-        let [input, output, error]  = [fs.getFile(0), fs.getFile(1), fs.getFile(2)];
-        let userInput = input.readline();
+        let userInput = readInput(sys);
         if (!userInput) {
             return 0;
         }
@@ -56,16 +70,14 @@
         var tokens;
         try {
             tokens = tokenizeAll(userInput, this.tokenize);
-            input.consume();
         } catch (error) {
-            input.rewind();
             return 1;
         }
         stripQuotes(tokens);
 
-        let command = tokens[0];
         let out = '';
         try {
+            let command = tokens[0];
             if (isPath(command)) {
                 out = this.execute(sys.fs.get(command), command, tokens);
             } else if (this.builtins.hasOwnProperty(command)) {
@@ -73,10 +85,9 @@
             } else {
                 out = this.execute(this.getFromPath(command), command, tokens);
             }
-            output.append(out);
+            writeOutput(sys, out);
         } catch (err) {
-            error.append(err.message);
-            throw err;
+            writeErr(sys, err);
         }
     }
 

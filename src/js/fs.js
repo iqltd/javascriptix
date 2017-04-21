@@ -82,11 +82,12 @@
         }
 
         list() {
-            var file, files = [];
-            for (file in this.content) {
-                if (this.content.hasOwnProperty(file)) {
-                    files.push(file);
-                }
+            let files = [];
+            let keys = this.content.keys();
+            let next = keys.next();
+            while (!next.done){
+                files.push(next.value);
+                next = keys.next();
             }
             return files;
         }

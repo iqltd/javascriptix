@@ -64,9 +64,11 @@
         input.append(userInput);
         if (bash.interpret()) {
             promptString = '> ';
+            input.rewind();
         } else {
             show(error.readline());
             show(output.readline());
+            input.consume();
         }
         resetPrompt(context, promptString);
     }

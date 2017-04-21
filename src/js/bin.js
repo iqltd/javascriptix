@@ -40,7 +40,7 @@
         } else {
             dir = fs.get(args[1], context.directory);
         }
-        dir.list().forEach(function (crt) {
+        dir.list().forEach(crt => {
             if (!crt.startsWith('.')) {
                 files += crt + '\t';
             }
