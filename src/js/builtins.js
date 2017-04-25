@@ -26,7 +26,9 @@
         return message;
     }
 
-    j$.__initBuiltins = function (bash, fs, context) {
+    j$.__initBuiltins = function (bash) {
+        let fs = bash.getFs();
+        let context = bash.getContext();
         bash.builtins = {
             cd: changeDirectory.bind(null, fs, context),
             echo: echo

@@ -62,7 +62,7 @@
         show(userInput, true);
         let [input, output, error]  = [fs.getFile(0), fs.getFile(1), fs.getFile(2)];
         input.append(userInput);
-        if (bash.interpret()) {
+        if (bash.process()) {
             promptString = '> ';
             input.rewind();
         } else {

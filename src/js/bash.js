@@ -1,19 +1,54 @@
 (function (j$) {
 
-    function isQuote(character) {
-        return '\'"'.includes(character);
+    function tokenizeAll(input, tokenize) {
+        let tokens = [];
+        let toTokenize = input;
+        while (toTokenize) {
+            let result = tokenize(toTokenize);
+            tokens.push(result.word);
+            toTokenize = result.rest;
+        }
+        return tokens;
     }
 
-    function isPath(command) {
-        return command.includes('/');
+    let isQuote = character => '\'"'.includes(character);
+    let stripQuotes = word => {
+        return isQuote(word[0]) ? word.substr(1, word.length - 2)
+                : word;
+    };
+
+    function process() {
+        let io = this.getIo();
+        let userInput = io.readInput();
+        if (!userInput) {
+            return 0;
+        }
+
+        try {
+            var tokens = tokenizeAll(userInput, this.tokenize);
+        } catch (error) {
+            return 1;
+        }
+
+        try {
+            let out = this.interpret(tokens.map(stripQuotes));
+            io.writeOutput(out);
+        } catch (err) {
+            io.writeErr(err);
+        }
     }
 
-    function stripQuotes(args) {
-        args.forEach(function (crt, i, array) {
-            if (crt && isQuote(crt[0])) {
-                array[i] = crt.substr(1, crt.length - 2);
-            }
-        });
+    let isPath = command => command.includes('/');    
+
+    function interpret(tokens) {
+        let command = tokens[0];
+        if (isPath(command)) {
+            return this.execute(this.getFs().get(command), command, tokens);
+        } else if (this.builtins.hasOwnProperty(command)) {
+            return this.builtins[command](tokens);
+        } else {
+            return this.execute(this.getFromPath(command), command, tokens);
+        }
     }
 
     function execute(executable, command, args) {
@@ -26,79 +61,26 @@
         }
     }
 
-    function getFromPATH(sys, filename) {
-        let fs = sys.fs;
-        let path = sys.context.env.PATH;
-        let find = p => fs.get(p + '/' + filename);
+    function getFromPATH(filename) {
+        let path = this.getContext().env.PATH;
+        let find = p => this.getFs().get(p + '/' + filename);
         let file = path.split(':').find(e => find(e));
         return find(file);
     }
 
-    function tokenizeAll(input, tokenize) {
-        let tokens = [];
-        let toTokenize = input;
-        while (toTokenize) {
-            let result = tokenize(toTokenize);
-            tokens.push(result.word);
-            toTokenize = result.rest;
+    class Bash {
+        constructor(system, io) {
+            this.getIo = () => io;
+            this.getSystem = () => system;
+            this.getFs = () => system.fs;
+            this.getContext = () => system.context;
+            this.process = process.bind(this);
+            this.interpret = interpret.bind(this);
+            this.execute = execute.bind(this);
+            this.getFromPath = getFromPATH.bind(this);
+            j$.__initBuiltins(this);
+            j$.__initTokenize(this);
         }
-        return tokens;
-    }
-
-    function readInput(sys) {
-        return sys.fs.getFile(0).readline();
-    }
-
-    function writeOutput(sys, text) {
-        if (text) {
-            sys.fs.getFile(1).append(text);
-        }
-    }
-
-    function writeErr(sys, text) {
-        if (text) {
-            sys.fs.getFile(2).append(text);
-        }
-    }
-
-    function interpret(sys) {
-        let userInput = readInput(sys);
-        if (!userInput) {
-            return 0;
-        }
-
-        var tokens;
-        try {
-            tokens = tokenizeAll(userInput, this.tokenize);
-        } catch (error) {
-            return 1;
-        }
-        stripQuotes(tokens);
-
-        let out = '';
-        try {
-            let command = tokens[0];
-            if (isPath(command)) {
-                out = this.execute(sys.fs.get(command), command, tokens);
-            } else if (this.builtins.hasOwnProperty(command)) {
-                out = this.builtins[command](tokens);
-            } else {
-                out = this.execute(this.getFromPath(command), command, tokens);
-            }
-            writeOutput(sys, out);
-        } catch (err) {
-            writeErr(sys, err);
-        }
-    }
-
-    function Bash(system) {
-        let [fs, context] = [system.fs, system.context];
-
-        this.interpret = interpret.bind(this, system);
-        this.execute = execute.bind(this);
-        this.getFromPath = getFromPATH.bind(this, system);
-        j$.__initBuiltins(this, fs, context);
-        j$.__initTokenize(this);
     }
 
     j$.__Bash = Bash;
