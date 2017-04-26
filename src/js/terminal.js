@@ -61,7 +61,7 @@
         let promptString;
         show(userInput, true);
         let [input, output, error]  = [fs.getFile(0), fs.getFile(1), fs.getFile(2)];
-        input.append(userInput + '\n');
+        input.append(userInput);
         if (bash.process()) {
             show(error.readline());
             show(output.readline());
