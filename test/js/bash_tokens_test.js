@@ -104,7 +104,7 @@
             assertEquals('a\\(b\\)', tokenize('a\\(b\\)'));
         },
         tokenize_incompleteQuoting: function () {
-            assertErrorThrown(tokenize, 'a"incomplete');
+            assertEquals(false, bash.tokenize('a"incomplete').complete);
         },
 
     };

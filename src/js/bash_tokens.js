@@ -17,7 +17,7 @@
         }
 
         getEnd(text, index) {
-            while (index <= text.length) {
+            while (index >= 0 && index <= text.length) {
                 if (this.ends(text, index)) {
                     return this.adjustEnd(index);
                 }
@@ -26,7 +26,7 @@
                 }
                 index++;
             }
-            throw 'incomplete';
+            return -2;
         }
     }
 
@@ -81,7 +81,7 @@
 
     let shouldBeSkipped = (token) => [comment, whitespace].includes(token);
 
-    function extractWord(text, start) {
+    function extractWord(text, start = 0) {
         if (start >= text.length) {
             return new Token(text, start, start);
         }    
@@ -94,8 +94,23 @@
         }
     }
 
+    function tokenizeAll(input) {
+        let tokens = [];
+        let toTokenize = input;
+        while (toTokenize) {
+            let result = extractWord(toTokenize);
+            if (!result.complete) {
+                return;
+            }
+            tokens.push(result.word);
+            toTokenize = result.rest;
+        }
+        return tokens;
+    }
+
     j$.__initTokenize = function (bash) {
         bash.tokenize = (text) => extractWord(text, 0);
+        bash.tokenizeAll = tokenizeAll;
     };
 
 }(window.j$ = window.j$ || {}));

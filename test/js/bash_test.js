@@ -15,16 +15,11 @@
     ts.tests = {
         execute_binary: function () {
             let executable = { content: () => 'executed'};
-            assertEquals('executed', bash.execute(executable));
-        },
-        execute_script: function () {
-            let executable = { content: 'command'};
-            bash.interpret = x => 'interpreted ' + x;
-            assertEquals('interpreted command', bash.execute(executable, 'command'));
+            assertEquals('executed', bash.execute(executable)());
         },
         execute_notFound: function () {
             bash.interpret = x => 'interpreted ' + x;
-            assertErrorThrown(bash.execute, null);
+            assertErrorThrown(bash.execute(null), null);
         },
     };
     t$.testSuites.push(ts);

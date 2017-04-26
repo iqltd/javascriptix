@@ -15,6 +15,8 @@
             } else {
                 throw new Error(args[1] + ': Not a directory');
             }
+        } else {
+            throw new Error(args[1] + ': No such file or directory');
         }
     }
     

@@ -1,63 +1,61 @@
 (function (j$) {
 
-    function tokenizeAll(input, tokenize) {
-        let tokens = [];
-        let toTokenize = input;
-        while (toTokenize) {
-            let result = tokenize(toTokenize);
-            tokens.push(result.word);
-            toTokenize = result.rest;
-        }
-        return tokens;
-    }
-
     let isQuote = character => '\'"'.includes(character);
     let stripQuotes = word => {
         return isQuote(word[0]) ? word.substr(1, word.length - 2)
                 : word;
     };
+    let strip = tokens => tokens.map(stripQuotes);
+    let isEmpty = list => list.length == 0;
+    let doNothing = () => {}; 
 
     function process() {
         let io = this.getIo();
-        let userInput = io.readInput();
-        if (!userInput) {
-            return 0;
-        }
-
-        try {
-            var tokens = tokenizeAll(userInput, this.tokenize);
-        } catch (error) {
-            return 1;
-        }
-
-        try {
-            let out = this.interpret(tokens.map(stripQuotes));
-            io.writeOutput(out);
-        } catch (err) {
-            io.writeErr(err);
-        }
+        let tokens = this.tokenizeAll(io.readInput());
+        if (tokens) {
+            let execute = isEmpty(tokens) ? doNothing
+                : this.interpret(strip(tokens));
+            perform(execute, io);
+            return true;
+        } 
+        return false;
     }
 
-    let isPath = command => command.includes('/');    
+    let isPath = command => command.includes('/');        
 
     function interpret(tokens) {
-        let command = tokens[0];
-        if (isPath(command)) {
-            return this.execute(this.getFs().get(command), command, tokens);
-        } else if (this.builtins.hasOwnProperty(command)) {
-            return this.builtins[command](tokens);
-        } else {
-            return this.execute(this.getFromPath(command), command, tokens);
+        if (tokens.length > 0) {
+            let command = tokens[0];
+            if (isPath(command)) {
+                return this.execute(this.getFs().get(command), tokens, this);
+            } else if (this.builtins.hasOwnProperty(command)) {
+                return () => this.builtins[command](tokens);
+            } else {
+                return this.execute(this.getFromPath(command), tokens, this);
+            }
         }
     }
 
-    function execute(executable, command, args) {
-        if (executable && executable.content instanceof Function) {
-            return executable.content(args);
-        } else if (executable) {
-            return this.interpret(executable.content);
-        } else {
-            throw new Error(command + ': command not found');
+    function execute(executable, args) {
+        return () => {
+            if (executable && executable.content instanceof Function) {
+                return executable.content(args);
+            } else if (executable) {
+                this.getIo().input.consume();
+                this.getIo().input.append(args);
+                return this.process();
+            } else {
+                throw new Error(args[0] + ': command not found');
+            }
+        };
+    }
+
+    function perform(execute, io) {
+        try {
+            let result = execute();
+            io.writeOutput(result);
+        } catch (err) {
+            io.writeErr(err.message);
         }
     }
 

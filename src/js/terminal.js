@@ -61,14 +61,14 @@
         let promptString;
         show(userInput, true);
         let [input, output, error]  = [fs.getFile(0), fs.getFile(1), fs.getFile(2)];
-        input.append(userInput);
+        input.append(userInput + '\n');
         if (bash.process()) {
-            promptString = '> ';
-            input.rewind();
-        } else {
             show(error.readline());
             show(output.readline());
             input.consume();
+        } else {
+            promptString = '> ';
+            input.rewind();
         }
         resetPrompt(context, promptString);
     }
