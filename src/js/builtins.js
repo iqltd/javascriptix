@@ -1,4 +1,4 @@
-(function (j$) {
+define(function () {
     
     function changeDirectory(fs, context, args) {
         var newDir;
@@ -28,13 +28,15 @@
         return message;
     }
 
-    j$.__initBuiltins = function (bash) {
+    function init(bash) {
         let fs = bash.getFs();
         let context = bash.getContext();
         bash.builtins = {
             cd: changeDirectory.bind(null, fs, context),
             echo: echo
         };
-    };
+    }
+
+    return { init };
     
-}(window.j$ = window.j$ || {}));
+});

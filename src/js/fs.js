@@ -1,4 +1,4 @@
-(function (j$) {
+define(function () {
 
     class FileSystemObject {
         constructor (name, parent, user) {
@@ -59,7 +59,7 @@
             if (this.content instanceof Function) {
                 return this.content(args);
             } else {
-                j$.bash(this.content);
+                throw 'Script running not supported';
             }
         }
     }
@@ -116,6 +116,7 @@
         var index = 0,
             startingIndex = 0,
             files = [];
+
         path = path.trim();
         if (path.charAt(0) === '/') {
             files.push('/');
@@ -132,18 +133,15 @@
         return files;
     }
 
-    function get(sys, path) {
-        var file, index,
+    function get(path, parent) {
+        let file = parent || this.root,
             dirs = parsePath(path);
 
+        let index = 0;
         if (dirs && dirs[0] === '/') {
             file = this.root;
             index = 1;
-        } else {
-            file = sys.context.directory;
-            index = 0;
         }
-
         while (index < dirs.length && file) {
             file = file.getChild(dirs[index]);
             index++;
@@ -151,41 +149,16 @@
         return file;
     }
 
-    function addDirs(parent, names) {
-        names.forEach(el => mkdir(el, parent, 0));
-    }
-
-    function addFiles(parent, names) {
-        names.forEach(el => touch(el, parent, 0));
-    }
-
-    function getFile(descriptor) {
-        switch (descriptor) {
-        case 0:
-            return this.get('/dev/stdin');
-        case 1:
-            return this.get('/dev/stdout');
-        case 2:
-            return this.get('/dev/stderr');
-        }
-    }
-
-    function Fs(sys) {
+    function Fs() {
         let root = new Directory('/', null, 0);
         this.root = root;
         this.mkdir = mkdir;
         this.touch = touch;
         this.rm = rm;
-        this.get = get.bind(this, sys);
-        this.getFile = getFile.bind(this);
+        this.get = get.bind(this);
         this.parsePath = parsePath;
-
-        addDirs(root, ['bin', 'dev', 'etc', 'home', 'lib', 'mnt', 'opt', 'proc', 'sbin', 'tmp', 'usr', 'var']);
-        addDirs(this.get('/usr'), ['bin', 'sbin', 'local']);
-        addDirs(this.get('/usr/local'), ['bin']);
-        addFiles(this.get('/dev'), ['stdin', 'stdout', 'stderr']);
     }
 
-    j$.__Fs = Fs;
+    return Fs;
 
-}(window.j$ = window.j$ || {}));
+});

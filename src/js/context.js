@@ -1,9 +1,8 @@
-(function (j$) {
+define(function () {
 
     var promptSymbol = '$';
 
-    function Context(username, system) {
-        let [sys, fs, auth] = [system, system.fs, system.auth];
+    function Context(username, auth, fs) {
         let user = auth.addUser(username, '/bin/bash');
         let homeDir = fs.mkdir(username, fs.get('/home'), user);
         
@@ -20,6 +19,6 @@
         this.promptString = () => `${user.name}@${this.env.HOSTNAME} ${promptSymbol} `;
     }
     
-    j$.__Context = Context;
+    return Context;
 
-}(window.j$ = window.j$ || {}));
+});

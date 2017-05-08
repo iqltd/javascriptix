@@ -1,4 +1,4 @@
-(function (j$) {
+define(function () {
 
     class TokenType {
         constructor(canContain) {
@@ -108,9 +108,11 @@
         return tokens;
     }
 
-    j$.__initTokenize = function (bash) {
+    function init(bash) {
         bash.tokenize = (text) => extractWord(text, 0);
         bash.tokenizeAll = tokenizeAll;
-    };
+    }
 
-}(window.j$ = window.j$ || {}));
+    return { init };
+
+});

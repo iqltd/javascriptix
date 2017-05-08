@@ -1,4 +1,4 @@
-(function (j$) {
+define(['system'], function (defaultSystem) {
 
     var j$Div, stdin, results, prompt;
 
@@ -32,14 +32,14 @@
         results.appendChild(line);
     }
 
-    function listen(sys, e) {
+    function listen(bash, sys, e) {
         if (e.keyCode === 13) {
-            processInput(sys, readUserInput());
+            processInput(bash, sys, readUserInput());
             return false;
         }
     }
 
-    function buildUi(sys) {
+    function buildUi(bash, sys) {
         let context = sys.context;
         j$Div = document.getElementById('javascriptix');
         j$Div.innerHTML = '';
@@ -47,7 +47,7 @@
         results = newElement('div', ['commandText', 'normalText'], '', 'results');
         prompt = newElement('span', ['commandText', 'promptText'], '', 'prompt');
 
-        stdin.addEventListener('keypress', listen.bind(null, sys));
+        stdin.addEventListener('keypress', listen.bind(null, bash, sys));
         resetPrompt(context);
 
         j$Div.appendChild(results);
@@ -56,11 +56,10 @@
         stdin.focus();
     }
 
-    function processInput(sys, userInput) {
-        let [bash, context, fs] = [j$.bash, sys.context, sys.fs];
+    function processInput(bash, sys, userInput) {
         let promptString;
         show(userInput, true);
-        let [input, output, error]  = [fs.getFile(0), fs.getFile(1), fs.getFile(2)];
+        let [input, output, error]  = [sys.getFileByDescriptor(0), sys.getFileByDescriptor(1), sys.getFileByDescriptor(2)];
         input.append(userInput);
         if (bash.process()) {
             show(error.readline());
@@ -70,13 +69,15 @@
             promptString = '> ';
             input.rewind();
         }
-        resetPrompt(context, promptString);
+        resetPrompt(sys.context, promptString);
     }
 
-    j$.__Terminal = function(system) {
-        this.init =  buildUi.bind(this, system);
-        this.processInput = processInput.bind(this, system);
+    function Terminal(bash, sys) {
+        let system = sys || defaultSystem;
+        this.init =  buildUi.bind(this, bash, system);
+        this.processInput = processInput.bind(this, bash, system);
         this.init();
-    };
+    }
 
-}(window.j$ = window.j$ || {}));
+    return Terminal;
+});

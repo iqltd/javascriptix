@@ -1,4 +1,4 @@
-(function (j$) {
+define(['system', 'builtins', 'bash_tokens'], function (defaultSystem, builtins, tokens) {
 
     let isQuote = character => '\'"'.includes(character);
     let stripQuotes = word => {
@@ -56,6 +56,8 @@
             io.writeOutput(result);
         } catch (err) {
             io.writeErr(err.message);
+            /*eslint no-console: ["error", { allow: ["error"] }] */
+            console.error(err);
         }
     }
 
@@ -67,8 +69,9 @@
     }
 
     class Bash {
-        constructor(system, io) {
-            this.getIo = () => io;
+        constructor(sys) {
+            let system = sys || defaultSystem;
+            this.getIo = () => system.io;
             this.getSystem = () => system;
             this.getFs = () => system.fs;
             this.getContext = () => system.context;
@@ -76,11 +79,11 @@
             this.interpret = interpret.bind(this);
             this.execute = execute.bind(this);
             this.getFromPath = getFromPATH.bind(this);
-            j$.__initBuiltins(this);
-            j$.__initTokenize(this);
+            builtins.init(this);
+            tokens.init(this);
         }
     }
 
-    j$.__Bash = Bash;
+    return Bash;
 
-}(window.j$ = window.j$ || {}));
+});

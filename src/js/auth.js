@@ -1,4 +1,4 @@
-(function (j$) {
+define(function () {
     
     let nextUid = 100,
         nextGid = 100;
@@ -31,13 +31,11 @@
         }
     }
     
-    function Auth() {
+    return function () {
         var users = new Map();
         this.root = new User('root', { shell: '/bin/bash', home: '/root', uid: '0', group: new Group('0', 'root')}); 
         this.addUser = addUser.bind(null, users);
         this.removeUser = removeUser.bind(null, users);
-    }
+    };
     
-    j$.__Auth = Auth;
-    
-}(window.j$ = window.j$ || {}));
+});
