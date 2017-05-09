@@ -1,5 +1,12 @@
 
-window.onload = function () {
+requirejs.config({
+    baseUrl: '../../src/js',
+    paths: {
+        test: '../../test/js'
+    }
+});
+
+requirejs(['test/t$'], function (t$) {
 
     function createReport(results) {
         let report = createReportSection();
@@ -130,10 +137,8 @@ window.onload = function () {
         return details;
     }
 
-    let results = window.t$.runTestSuites(window.t$.testSuites);
+    let results = t$.runTestSuites(t$.testSuites);
     const report = createReport(results);
     document.getElementById('results').appendChild(report);
     
-};
-
-
+});

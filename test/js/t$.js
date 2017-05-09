@@ -1,6 +1,4 @@
-(function (t$) {
-
-    var j$ = window.j$;
+define(['test/app_test'], function (j$) {
 
     function simpleEquals(o1, o2) {
         return o1 === o2;
@@ -90,7 +88,7 @@
         for (let test in testSuite.tests) {
             if (tests[test] instanceof Function) {
                 try {
-                    let sys = initSystem();
+                    let sys = {};//initSystem();
                     runIfDefined(testSuite.before, sys);
                     tests[test](sys);
                     testResults.push(new TestResult(test));
@@ -120,29 +118,31 @@
         fs.get = x => (x === path) ? file : oldGet(x);
     }
 
-    function initSystem() {
-        let sys = {};
-        sys.auth = new j$.__Auth();
-        sys.fs = new j$.__Fs(sys);
-        sys.context = new j$.__Context('test', sys);
-        window.j$.__initBins(sys);
+    // function initSystem() {
+    //     let sys = {};
+    //     sys.auth = new j$.__Auth();
+    //     sys.fs = new j$.__Fs(sys);
+    //     sys.context = new j$.__Context('test', sys);
+    //     window.j$.__initBins(sys);
 
-        let test = sys.fs.mkdir('test', sys.fs.root, sys.auth.root);
-        let dir1 = sys.fs.mkdir('dir1', test, sys.auth.root);
-        sys.fs.touch('file1', dir1, sys.auth.root);
-        sys.fs.touch('file2', dir1, sys.auth.root);
-        sys.fs.mkdir('dir2', test, sys.auth.root);
-        sys.context.directory = test;
-        return sys;
-    }
+    //     let test = sys.fs.mkdir('test', sys.fs.root, sys.auth.root);
+    //     let dir1 = sys.fs.mkdir('dir1', test, sys.auth.root);
+    //     sys.fs.touch('file1', dir1, sys.auth.root);
+    //     sys.fs.touch('file2', dir1, sys.auth.root);
+    //     sys.fs.mkdir('dir2', test, sys.auth.root);
+    //     sys.context.directory = test;
+    //     return sys;
+    // }
 
-    t$.assertTrue = assertTrue;
-    t$.assertDefined = assertDefined;
-    t$.assertEquals = assertEquals;
-    t$.arrayEquals = arrayEquals;
-    t$.runTestSuites = runTestSuites;
-    t$.assertErrorThrown = assertErrorThrown;
-    t$.initSystem = initSystem;
-    t$.mockFsGet = mockFsGet;
-
-}(window.t$ = window.t$ || {}));
+    return {
+        assertTrue, 
+        assertDefined, 
+        assertEquals, 
+        arrayEquals,
+        assertErrorThrown, 
+        runTestSuites, 
+        //initSystem, 
+        mockFsGet,
+        testSuites: []
+    };
+});
