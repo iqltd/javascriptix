@@ -1,4 +1,4 @@
-define(['system'], function (system) {
+define(['system'], function (defaultSystem) {
 
     function getArgument(args, index) {
         if (args.length < index + 1) {
@@ -90,8 +90,8 @@ define(['system'], function (system) {
         return file.content;
     }
 
-    function init() {
-        let [sys, fs, auth] = [system, system.fs, system.auth];
+    function init(sys = defaultSystem) {
+        let [fs, auth] = [sys.fs, sys.auth];
         let [root, bin, usrBin] = [auth.root, fs.get('/bin'), fs.get('/usr/bin')];
 
         fs.touch('pwd', bin, root, printWorkingDirectory.bind(null, sys));
