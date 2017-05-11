@@ -1,18 +1,15 @@
-(function (t$) {
-    t$.testSuites = t$.testSuites || [];
-
-    let j$ = window.j$;
+define(['test/tools', 'test/mocks'], function (t$, mocks) {
     let assertEquals = t$.assertEquals;
     let assertErrorThrown = t$.assertErrorThrown;
 
     let bash = {};
 
     function initBash(sys) {
-        bash = new j$.__Bash(sys);
+        bash = mocks.initBash(sys);
     }
 
-    let ts = {name: 'bash - execute', before: initBash};
-    ts.tests = {
+    let ts1 = {name: 'bash - execute', before: initBash};
+    ts1.tests = {
         execute_binary: function () {
             let executable = { content: () => 'executed'};
             assertEquals('executed', bash.execute(executable)());
@@ -22,25 +19,24 @@
             assertErrorThrown(bash.execute(null), null);
         },
     };
-    t$.testSuites.push(ts);
 
-    ts = {name: 'bash - getFromPath', before: initBash};
-    ts.tests = {
+    let ts2 = {name: 'bash - getFromPath', before: initBash};
+    ts2.tests = {
         getFromPath_first: function (sys) {
             let file = Symbol();
-            t$.mockFsGet(sys.fs, '1/file', file);
+            mocks.mockFsGet(sys.fs, '1/file', file);
             sys.context.env.PATH = '1:2:3';
             assertEquals(file, bash.getFromPath('file'));
         },
         getFromPath_inTheMiddle: function (sys) {
             let file = Symbol();
-            t$.mockFsGet(sys.fs, '2/file', file);
+            mocks.mockFsGet(sys.fs, '2/file', file);
             sys.context.env.PATH = '1:2:3';
             assertEquals(file, bash.getFromPath('file'));
         },
         getFromPath_last: function (sys) {
             let file = Symbol();
-            t$.mockFsGet(sys.fs, '3/file', file);
+            mocks.mockFsGet(sys.fs, '3/file', file);
             sys.context.env.PATH = '1:2:3';
             assertEquals(file, bash.getFromPath('file'));
         },
@@ -50,6 +46,7 @@
             assertEquals(false, bash.getFromPath('file'));
         },
     };
-    t$.testSuites.push(ts);
 
-}(window.t$ = window.t$ || {}));
+    return [ ts1, ts2 ];
+
+});

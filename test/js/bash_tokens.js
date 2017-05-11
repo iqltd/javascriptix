@@ -1,12 +1,8 @@
-(function (t$) {
-    t$.testSuites = t$.testSuites || [];
+define(['test/tools', 'test/mocks'], function (t$, mocks) {
 
-    let j$ = window.j$;
     let assertEquals = t$.assertEquals;
-    let assertErrorThrown = t$.assertErrorThrown;
-    let sys = t$.initSystem();
-    let bash = new j$.__Bash(sys);
 
+    let bash = mocks.initBash();
     let tokenize = text => bash.tokenize(text).word;
 
     let ts = {name: 'bash - tokenize'};
@@ -105,11 +101,9 @@
         },
         tokenize_incompleteQuoting: function () {
             assertEquals(false, bash.tokenize('a"incomplete').complete);
-        },
-
+        }
     };
-    t$.testSuites.push(ts);
-
     
+    return [ ts ];
 
-}(window.t$ = window.t$ || {}));
+});

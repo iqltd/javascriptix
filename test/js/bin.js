@@ -1,126 +1,133 @@
-(function (t$) {
-    t$.testSuites = t$.testSuites || [];
+define(['test/tools', 'test/mocks'], function (t$, mocks) {
+    let testSuites = [];
 
     let [assertEquals, assertDefined] = [t$.assertEquals, t$.assertDefined];
-    let pwd, whoami, ls, mkdir, touch, rm, cat;
+    let rm, cat;
 
-    t$.testSuites.push({
+    let bin = (path, sys) => sys.fs.get(path).content;
+    let initBin = sys => mocks.initBin(sys);
+
+    testSuites.push({
         name: '/bin/pwd',
-        before: sys => pwd = sys.fs.get('/bin/pwd').content,
+        before: initBin,
         tests: {
             pwd_root: function (sys) {
                 sys.context.directory = sys.fs.root;
-                assertEquals('/', pwd());
+                assertEquals('/', bin('/bin/pwd', sys)());
             }
         }
     });
 
-    t$.testSuites.push({
+    testSuites.push({
         name: '/usr/bin/whoami',
-        before: sys => whoami = sys.fs.get('/usr/bin/whoami').content,
+        before: initBin,
         tests: {
             whoami_username: function (sys) {
                 sys.context.user.name = 'username';
-                assertEquals('username', whoami());
+                assertEquals('username', bin('/usr/bin/whoami', sys)());
             }
         }
     });
 
-    t$.testSuites.push({
+    testSuites.push({
         name: '/bin/ls',
-        before: sys => ls = sys.fs.get('/bin/ls').content,
+        before: initBin,
         tests: {
             ls_oneFile: function (sys) {
-                t$.mockFsGet(sys.fs, 'path', {list: () => ['1']});
-                assertEquals('1\t', ls(['ls', 'path']));
+                mocks.mockFsGet(sys.fs, 'path', {list: () => ['1']});
+                assertEquals('1\t', bin('/bin/ls', sys)(['ls', 'path']));
             },
             ls_empty: function (sys) {
-                t$.mockFsGet(sys.fs, 'path', {list: () => []});
-                assertEquals('', ls(['ls', 'path']));
+                mocks.mockFsGet(sys.fs, 'path', {list: () => []});
+                assertEquals('', bin('/bin/ls', sys)(['ls', 'path']));
             }
         }
     });
 
-    t$.testSuites.push({
+    testSuites.push({
         name: '/bin/mkdir',
-        before: sys => mkdir = sys.fs.get('/bin/mkdir').content,
+        before: initBin,
         tests: {
             mkdir_absoluteOk: function (sys) {
-                mkdir(['mkdir', '/test/dir1/newDir']);
+                bin('/bin/mkdir', sys)(['mkdir', '/test/dir1/newDir']);
                 assertDefined(sys.fs.get('/test/dir1/newDir'));
             },
             mkdir_relativeOk: function (sys) {
-                mkdir(['mkdir', 'newDir']);
+                bin('/bin/mkdir', sys)(['mkdir', 'newDir']);
                 assertDefined(sys.fs.get('/test/newDir'));
             },
-            mkdir_directoryExists: function () {
+            mkdir_directoryExists: function (sys) {
+                let mkdir = bin('/bin/mkdir', sys);
                 mkdir(['mkdir', '/test/dir1/newDir']);
-                window.t$.assertErrorThrown(mkdir, ['mkdir', '/test/dir1/newDir']);
+                t$.assertErrorThrown(mkdir, ['mkdir', '/test/dir1/newDir']);
             }
         }
     });
 
-    t$.testSuites.push({
+    testSuites.push({
         name: '/bin/touch',
-        before: sys => touch = sys.fs.get('/bin/touch').content,
+        before: initBin,
         tests: {
             touch_absoluteOk: function (sys) {
-                touch(['touch', '/test/newFile']);
+                bin('/bin/touch', sys)(['touch', '/test/newFile']);
                 assertDefined(sys.fs.get('/test/newFile'));
             },
             touch_relativeOk: function (sys) {
-                touch(['touch', 'newFile']);
+                bin('/bin/touch', sys)(['touch', 'newFile']);
                 assertDefined(sys.fs.get('/test/newFile'));
             },
             touch_fileExists: function (sys) {
-                touch(['touch', '/test/newFile']);
-                touch(['touch', '/test/newFile']);
+                bin('/bin/touch', sys)(['touch', '/test/newFile']);
+                bin('/bin/touch', sys)(['touch', '/test/newFile']);
                 assertDefined(sys.fs.get('/test/newFile'));
             }
         }
     });
 
-    t$.testSuites.push({
+    testSuites.push({
         name: '/bin/rm',
-        before: sys => rm = sys.fs.get('/bin/rm').content,
+        before: initBin,
         tests: {
             rm_absoluteOk: function (sys) {
                 assertDefined(sys.fs.get('/test/dir1'));
-                rm(['rm', '/test/dir1']);
+                bin('/bin/rm', sys)(['rm', '/test/dir1']);
                 assertEquals(undefined, sys.fs.get('/test/dir1'));
             },
             rm_relativeOk: function (sys) {
                 assertDefined(sys.fs.get('/test/dir1'));
-                rm(['touch', 'dir1']);
+                bin('/bin/rm', sys)(['touch', 'dir1']);
                 assertEquals(undefined, sys.fs.get('/test/dir1'));
             },
-            rm_fileExists: function () {
+            rm_fileExists: function (sys) {
+                let rm = bin('/bin/rm', sys);
                 rm(['rm', '/test/dir1']);
-                window.t$.assertErrorThrown(rm, ['rm', '/test/dir1']);
+                t$.assertErrorThrown(rm, ['rm', '/test/dir1']);
             }
         }
     });
 
-    t$.testSuites.push({
+    testSuites.push({
         name: '/bin/cat',
-        before: sys => cat = sys.fs.get('/bin/cat').content,
+        before: initBin,
         tests: {
             cat_absoluteOk: function (sys) {
                 let content = Symbol();
                 assertDefined(sys.fs.get('/test/dir1/file1'));
                 sys.fs.get('/test/dir1/file1').content = content;
-                assertEquals(content, cat(['cat', '/test/dir1/file1']));
+                assertEquals(content, bin('/bin/cat', sys)(['cat', '/test/dir1/file1']));
             },
-            rm_relativeOk: function (sys) {
+            cat_relativeOk: function (sys) {
                 let content = Symbol();
                 assertDefined(sys.fs.get('/test/dir1/file1'));
                 sys.fs.get('/test/dir1/file1').content = content;
-                assertEquals(content, cat(['cat', 'dir1/file1']));
+                assertEquals(content, bin('/bin/cat', sys)(['cat', 'dir1/file1']));
             },
-            cat_fileDoesntExist: function () {
-                window.t$.assertErrorThrown(cat, ['cat', '/test/nonexistent']);
+            cat_fileDoesntExist: function (sys) {
+                t$.assertErrorThrown(bin('/bin/cat', sys), ['cat', '/test/nonexistent']);
             }
         }
     });
 
-}(window.t$ = window.t$ || {}));
+    return testSuites;
+
+});

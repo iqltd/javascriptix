@@ -1,54 +1,49 @@
-(function (t$) {
-    t$.testSuites = t$.testSuites || [];
-
-    let j$ = window.j$;
+define(['test/tools', 'test/mocks'], function (t$, mocks) {
     let assertEquals = t$.assertEquals;
     let assertErrorThrown = t$.assertErrorThrown;
 
     let bash = {};
-    let sys = {};
 
-    function initBash() {
-        sys = t$.initSystem();
-        bash = new j$.__Bash(sys);
+    function initBash(sys) {
+        bash = mocks.initBash(sys);
     }
 
-    let ts = {name: 'bash builtins - echo', beforeAll: initBash};
-    ts.tests = {
+    let ts1 = {name: 'bash builtins - echo', before: initBash};
+    ts1.tests = {
         echo_whatever: function () {
             assertEquals('hello, world! ', bash.builtins.echo(['echo', 'hello, world!']));
         }
     };
-    t$.testSuites.push(ts);
 
-    ts = {name: 'bash builtins - cd', beforeAll: initBash};
-    ts.tests = {
-        cd_root: function () {
+    let ts2 = {name: 'bash builtins - cd', before: initBash};
+    ts2.tests = {
+        cd_root: function (sys) {
             bash.builtins.cd(['cd', '/']);
             assertEquals(sys.fs.root, sys.context.directory);
         },
-        cd_home: function () {
+        cd_home: function (sys) {
             bash.builtins.cd(['cd']);
             assertEquals(sys.context.user.home + '/', sys.context.directory.path);
         },
-        cd_relative: function () {
+        cd_relative: function (sys) {
             sys.fs.mkdir('a', sys.fs.get(sys.context.user.home), sys.context.user);
             bash.builtins.cd(['cd']);
             bash.builtins.cd(['cd', 'a']);
             assertEquals(sys.context.user.home + '/a/', sys.context.directory.path);
         },
-        cd_startWithFullStop: function () {
+        cd_startWithFullStop: function (sys) {
             sys.fs.mkdir('a', sys.fs.get(sys.context.user.home), sys.context.user);
             bash.builtins.cd(['cd']);
             bash.builtins.cd(['cd', './a']);
             assertEquals(sys.context.user.home + '/a/', sys.context.directory.path);
         },
-        cd_file: function () {
+        cd_file: function (sys) {
             sys.fs.touch('file', sys.fs.get(sys.context.user.home), sys.context.user);
             bash.builtins.cd(['cd']);
             assertErrorThrown(bash.builtins.cd, ['cd', 'file']);
         }
     };
-    t$.testSuites.push(ts);
+    
+    return [ ts1, ts2 ];
 
-}(window.t$ = window.t$ || {}));
+});

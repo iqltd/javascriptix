@@ -1,12 +1,12 @@
 
 requirejs.config({
-    baseUrl: '../../src/js',
+    baseUrl: '../src/js',
     paths: {
         test: '../../test/js'
     }
 });
 
-requirejs(['test/t$'], function (t$) {
+requirejs(['test/runner'], function (t$) {
 
     function createReport(results) {
         let report = createReportSection();

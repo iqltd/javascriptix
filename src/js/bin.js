@@ -11,7 +11,7 @@ define(['system'], function (defaultSystem) {
         var creation = {}, dirs;
         dirs = fs.parsePath(path);
         creation.filename = dirs.pop();
-        creation.parent = dirs ? fs.get(dirs.join('/')) : context.directory;
+        creation.parent = dirs.length ? fs.get(dirs.join('/')) : context.directory;
         if (!parent) {
             throw new Error(`cannot create ${type} '${path}': No such file or directory`);
         }
@@ -19,13 +19,11 @@ define(['system'], function (defaultSystem) {
     }
 
     function printWorkingDirectory(sys) {
-        let context = sys.context;
-        return context.directory.path;
+        return sys.context.directory.path;
     }
 
     function whoAmI(sys) {
-        let context = sys.context;
-        return context.user.name;
+        return sys.context.user.name;
     }
 
     function clear(sys) {
