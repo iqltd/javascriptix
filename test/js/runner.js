@@ -37,6 +37,10 @@ define(['test/mocks', 'test/auth', 'test/bash_tokens', 'test/bash', 'test/bin', 
             get failed() {
                 return this.testResults.filter(result => result.failed).length;
             }
+
+            get passed() {
+                return this.all - this.failed;
+            }
         }
 
         function runTests(testSuite) {

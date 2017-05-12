@@ -12,7 +12,7 @@ define(['system'], function (defaultSystem) {
         dirs = fs.parsePath(path);
         creation.filename = dirs.pop();
         creation.parent = dirs.length ? fs.get(dirs.join('/')) : context.directory;
-        if (!parent) {
+        if (!creation.parent) {
             throw new Error(`cannot create ${type} '${path}': No such file or directory`);
         }
         return creation;

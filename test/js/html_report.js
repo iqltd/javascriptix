@@ -29,7 +29,7 @@ requirejs(['test/runner'], function (t$) {
         let failuresSection = createElement('DIV');
         let failures = results.filter(result => result.failed);
         if (failures && failures.length > 0) {
-            failuresSection.appendChild(createElement('H2', 'Failed tests:'));
+            failuresSection.appendChild(createElement('H2', 'Failed test suites:'));
             failures.forEach((testSuiteResult, index) => {
                 let id = idForFailure(index);
                 failuresSection.appendChild(createTestSuiteResultFailureSectionTitle(testSuiteResult, id));
@@ -47,7 +47,7 @@ requirejs(['test/runner'], function (t$) {
         let successSection = createElement('DIV');
         let successes = results.filter(result => !result.failed);
         if (successes) {
-            successSection.appendChild(createElement('H2', 'Passed tests:'));
+            successSection.appendChild(createElement('H2', 'Passed test suites:'));
             successes.forEach((testSuiteResult, index) => {
                 let id = idForSuccess(index);
                 successSection.appendChild(createTestSuiteResultSuccessSectionTitle(testSuiteResult, id));

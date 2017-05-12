@@ -2,7 +2,6 @@ define(['test/tools', 'test/mocks'], function (t$, mocks) {
     let testSuites = [];
 
     let [assertEquals, assertDefined] = [t$.assertEquals, t$.assertDefined];
-    let rm, cat;
 
     let bin = (path, sys) => sys.fs.get(path).content;
     let initBin = sys => mocks.initBin(sys);
