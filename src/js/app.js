@@ -1,5 +1,5 @@
 requirejs.config({
-    baseUrl: 'src/js',
+    baseUrl: 'js',
 });
 
 var j$ = {};
