@@ -33,6 +33,7 @@ define(function () {
 
         write(text) {
             this.content = text;
+            this.readPointer = 0;
         }
 
         isEmpty() {
@@ -43,6 +44,12 @@ define(function () {
             let old = this.readPointer;
             this.readPointer = this.content.includes('\n') ? this.content.indexOf('\n')
                 : this.content.length;
+            return this.content.slice(old, this.readPointer);
+        }
+        
+        read() {
+            let old = this.readPointer;
+            this.readPointer = this.content.length;
             return this.content.slice(old, this.readPointer);
         }
 

@@ -63,7 +63,8 @@ define(['system'], function (defaultSystem) {
         input.append(userInput);
         if (bash.process()) {
             show(error.readline());
-            show(output.readline());
+            show(output.read());
+            output.consume();
             input.consume();
         } else {
             promptString = '> ';
