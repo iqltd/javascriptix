@@ -1,7 +1,8 @@
 
 /* eslint-env node */
 /* eslint no-console: 0 */
-var requirejs = require('requirejs');
+let requirejs = require('requirejs');
+let process = require('process'); 
 
 requirejs.config({
     baseUrl: '../src/js',
@@ -40,4 +41,6 @@ requirejs(['test/runner'], function (t$) {
     let allTests = results.reduce((total, crt) => total + crt.all, 0);
     console.log('\nSUMMARY:');
     console.log(`All: ${allTests}, Passed: ${allTests - failedTests}, Failed: ${failedTests} `);
+
+    process.exit(failed.length);
 });
