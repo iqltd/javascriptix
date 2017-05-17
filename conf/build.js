@@ -1,5 +1,5 @@
 ({
-    baseUrl: "../src/js",
-	name: "app",
-	out: "../build/javascriptix.js"
-})
+    baseUrl: '../src/js',
+    name: 'app',
+    out: '../build/javascriptix.js'
+});

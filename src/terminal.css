@@ -1,5 +1,9 @@
-html, body {
+#javascriptix {
     background-color: black;
+    min-width: 400px;
+    min-height: 400px;
+    width: 100%;
+    height: 100%;
 }
 
 p {
@@ -26,7 +30,7 @@ p {
 
 #stdin {
     background-color: black;
-    width: 80%;
+    width: 70%;
     height: 1.1em;
     padding: 0;
     

@@ -376,7 +376,6 @@ define('terminal',['system'], function (defaultSystem) {
         let system = sys || defaultSystem;
         this.init =  buildUi.bind(this, bash, system);
         this.processInput = processInput.bind(this, bash, system);
-        this.init();
     }
 
     return Terminal;
@@ -741,16 +740,28 @@ define('bin',['system'], function (defaultSystem) {
 
 });
 
+var j$ = {};
+
+define('javascriptix',['terminal', 'bash', 'bin', 'system'], 
+    function (Terminal, Bash, bins, system) {
+        let init = () => {
+            bins.init(); 
+            j$.bash = new Bash();   
+            j$.terminal = new Terminal(j$.bash);
+
+            j$.terminal.init();
+
+            return system;
+        };
+        return { init };
+    }
+);
 requirejs.config({
     baseUrl: 'js',
 });
 
-var j$ = {};
-
-requirejs(['terminal', 'bash', 'bin'], function (Terminal, Bash, bins) {
-    bins.init(); 
-    j$.bash = new Bash();   
-    j$.terminal = new Terminal(j$.bash);
+requirejs(['javascriptix'], function (j$) {
+    j$.init();
 });
 define("app", function(){});
 

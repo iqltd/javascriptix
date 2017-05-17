@@ -77,7 +77,6 @@ define(['system'], function (defaultSystem) {
         let system = sys || defaultSystem;
         this.init =  buildUi.bind(this, bash, system);
         this.processInput = processInput.bind(this, bash, system);
-        this.init();
     }
 
     return Terminal;
