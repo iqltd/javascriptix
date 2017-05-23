@@ -26,8 +26,9 @@ define(['system'], function (defaultSystem) {
         return sys.context.user.name;
     }
 
-    function clear(sys) {
-        sys.terminal.init();
+    function clear() {
+        /*global j$*/
+        j$.terminal.init();
     }
 
     function listFiles(sys, args) {
