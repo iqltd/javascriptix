@@ -1,10 +1,15 @@
 define(function () {
 
+    let nextInode = (() => {
+        let inode = 0;
+        return () => inode++;
+    })();
+
     class FileSystemObject {
         constructor (name, parent, user) {
             this.name = name;
             this.parent = parent;
-            this.inode = 0;
+            this.inode = nextInode();
             this.user = user;
             this.group = user.group;
             this.isRoot = this.parent === null;    

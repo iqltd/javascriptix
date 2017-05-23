@@ -1,6 +1,6 @@
 define(['system'], function (defaultSystem) {
 
-    var j$Div, stdin, results, prompt;
+    var j$Div, stdin, results, promptString;
 
     function readUserInput() {
         return stdin.value.trim();
@@ -8,7 +8,7 @@ define(['system'], function (defaultSystem) {
 
     function resetPrompt(context, string) {
         stdin.value = '';
-        prompt.textContent = string || context.promptString();
+        promptString.textContent = string || context.promptString();
     }
 
     function newElement(elementType, classList, textContent, id) {
@@ -24,7 +24,7 @@ define(['system'], function (defaultSystem) {
     function show(text, showPromptText) {
         var line = document.createElement('div');
         if (showPromptText) {
-            line.appendChild(newElement('span', ['commandText', 'promptText'], prompt.textContent));
+            line.appendChild(newElement('span', ['commandText', 'promptText'], promptString.textContent));
         }
         if (text) {
             line.appendChild(newElement('span', ['preformatted'], text));
@@ -43,16 +43,22 @@ define(['system'], function (defaultSystem) {
         let context = sys.context;
         j$Div = document.getElementById('javascriptix');
         j$Div.innerHTML = '';
-        stdin = newElement('textarea', ['commandText', 'normalText'], '', 'stdin');
         results = newElement('div', ['commandText', 'normalText'], '', 'results');
-        prompt = newElement('span', ['commandText', 'promptText'], '', 'prompt');
+        promptString = newElement('span', ['commandText', 'promptText'], '', 'prompt-string');
+        stdin = newElement('textarea', ['commandText', 'normalText'], '', 'stdin');
 
         stdin.addEventListener('keypress', listen.bind(null, bash, sys));
         resetPrompt(context);
 
         j$Div.appendChild(results);
-        j$Div.appendChild(prompt);
-        j$Div.appendChild(stdin);
+        let commandline = newElement('div', [], '', 'command-line');
+        let psWrapper = newElement('div', [], '', 'ps-wrapper');
+        psWrapper.appendChild(promptString);
+        commandline.appendChild(psWrapper);
+        let stdinWrapper = newElement('div', [], '', 'stdin-wrapper');
+        stdinWrapper.appendChild(stdin);
+        commandline.appendChild(stdinWrapper);
+        j$Div.appendChild(commandline);
         stdin.focus();
     }
 

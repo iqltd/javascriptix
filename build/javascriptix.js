@@ -41,11 +41,16 @@ define('auth',[],function () {
 });
 define('fs',[],function () {
 
+    let nextInode = (() => {
+        let inode = 0;
+        return () => inode++;
+    })();
+
     class FileSystemObject {
         constructor (name, parent, user) {
             this.name = name;
             this.parent = parent;
-            this.inode = 0;
+            this.inode = nextInode();
             this.user = user;
             this.group = user.group;
             this.isRoot = this.parent === null;    
@@ -299,7 +304,7 @@ define('system',['auth', 'fs', 'context'], function (Auth, Fs, Context) {
 });
 define('terminal',['system'], function (defaultSystem) {
 
-    var j$Div, stdin, results, prompt;
+    var j$Div, stdin, results, promptString;
 
     function readUserInput() {
         return stdin.value.trim();
@@ -307,7 +312,7 @@ define('terminal',['system'], function (defaultSystem) {
 
     function resetPrompt(context, string) {
         stdin.value = '';
-        prompt.textContent = string || context.promptString();
+        promptString.textContent = string || context.promptString();
     }
 
     function newElement(elementType, classList, textContent, id) {
@@ -323,7 +328,7 @@ define('terminal',['system'], function (defaultSystem) {
     function show(text, showPromptText) {
         var line = document.createElement('div');
         if (showPromptText) {
-            line.appendChild(newElement('span', ['commandText', 'promptText'], prompt.textContent));
+            line.appendChild(newElement('span', ['commandText', 'promptText'], promptString.textContent));
         }
         if (text) {
             line.appendChild(newElement('span', ['preformatted'], text));
@@ -342,16 +347,22 @@ define('terminal',['system'], function (defaultSystem) {
         let context = sys.context;
         j$Div = document.getElementById('javascriptix');
         j$Div.innerHTML = '';
-        stdin = newElement('textarea', ['commandText', 'normalText'], '', 'stdin');
         results = newElement('div', ['commandText', 'normalText'], '', 'results');
-        prompt = newElement('span', ['commandText', 'promptText'], '', 'prompt');
+        promptString = newElement('span', ['commandText', 'promptText'], '', 'prompt-string');
+        stdin = newElement('textarea', ['commandText', 'normalText'], '', 'stdin');
 
         stdin.addEventListener('keypress', listen.bind(null, bash, sys));
         resetPrompt(context);
 
         j$Div.appendChild(results);
-        j$Div.appendChild(prompt);
-        j$Div.appendChild(stdin);
+        let commandline = newElement('div', [], '', 'command-line');
+        let psWrapper = newElement('div', [], '', 'ps-wrapper');
+        psWrapper.appendChild(promptString);
+        commandline.appendChild(psWrapper);
+        let stdinWrapper = newElement('div', [], '', 'stdin-wrapper');
+        stdinWrapper.appendChild(stdin);
+        commandline.appendChild(stdinWrapper);
+        j$Div.appendChild(commandline);
         stdin.focus();
     }
 
@@ -742,11 +753,11 @@ define('bin',['system'], function (defaultSystem) {
 
 var j$ = {};
 
-define('javascriptix',['terminal', 'bash', 'bin', 'system'], 
+define('javascriptix',['terminal', 'bash', 'bin', 'system'],
     function (Terminal, Bash, bins, system) {
         let init = () => {
-            bins.init(); 
-            j$.bash = new Bash();   
+            bins.init();
+            j$.bash = new Bash();
             j$.terminal = new Terminal(j$.bash);
 
             j$.terminal.init();

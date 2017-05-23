@@ -28,9 +28,24 @@ p {
     white-space: pre-wrap;
 }
 
+#command-line {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#command-line div {
+    display: inline-block;
+}
+
+#stdin-wrapper {
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
 #stdin {
     background-color: black;
-    width: 70%;
+    width: 100%;
     height: 1.1em;
     padding: 0;
     
