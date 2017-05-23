@@ -1,5 +1,7 @@
 define(function () {
 
+    let allFiles = new Map();
+
     let nextInode = (() => {
         let inode = 0;
         return () => inode++;
@@ -12,7 +14,8 @@ define(function () {
             this.inode = nextInode();
             this.user = user;
             this.group = user.group;
-            this.isRoot = this.parent === null;    
+            this.isRoot = this.parent === null;
+            allFiles.set(this.inode, this);
         }
 
         get path() {
@@ -169,6 +172,7 @@ define(function () {
         this.rm = rm;
         this.get = get.bind(this);
         this.parsePath = parsePath;
+        this.getByInode = inode => allFiles.get(inode);
     }
 
     return Fs;

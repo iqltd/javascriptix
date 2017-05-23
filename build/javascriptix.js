@@ -41,6 +41,8 @@ define('auth',[],function () {
 });
 define('fs',[],function () {
 
+    let allFiles = new Map();
+
     let nextInode = (() => {
         let inode = 0;
         return () => inode++;
@@ -53,7 +55,8 @@ define('fs',[],function () {
             this.inode = nextInode();
             this.user = user;
             this.group = user.group;
-            this.isRoot = this.parent === null;    
+            this.isRoot = this.parent === null;
+            allFiles.set(this.inode, this);
         }
 
         get path() {
@@ -210,6 +213,7 @@ define('fs',[],function () {
         this.rm = rm;
         this.get = get.bind(this);
         this.parsePath = parsePath;
+        this.getByInode = inode => allFiles.get(inode);
     }
 
     return Fs;
@@ -671,8 +675,9 @@ define('bin',['system'], function (defaultSystem) {
         return sys.context.user.name;
     }
 
-    function clear(sys) {
-        sys.terminal.init();
+    function clear() {
+        /*global j$*/
+        j$.terminal.init();
     }
 
     function listFiles(sys, args) {
